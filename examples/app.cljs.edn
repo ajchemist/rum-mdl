@@ -1,0 +1,2 @@
+{:require  [rum.mdl.examples]
+ :init-fns []}
