@@ -2,10 +2,10 @@
  :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
 
-                 [rum "0.8.0" :scope "provided"]
+                 [rum "0.8.1" :scope "provided"]
                  [cljsjs/material "1.1.3-1" :scope "provided"]
 
-                 [ajchemist/classname "0.2.0"]
+                 [ajchemist/classname "0.2.1"]
 
                  [garden "1.3.2" :scope "test"]
                  [adzerk/bootlaces "0.1.13" :scope "test"]
@@ -15,7 +15,7 @@
                  [pandeiro/boot-http "0.7.0"]
                  [jeluard/boot-notify "0.2.0" :scope "test"]
 
-                 [ajchemist/boot-figwheel "0.5.2-1" :scope "test"]
+                 [ajchemist/boot-figwheel "0.5.2-2" :scope "test"]
                  [org.clojure/tools.nrepl "0.2.12" :scope "test"]
                  [com.cemerick/piggieback "0.2.1"  :scope "test"]
                  [figwheel-sidecar "0.5.2" :scope "test"]])
@@ -44,21 +44,22 @@
         :elide-asserts true}
     (merge common-opts)))
 
-(def +version+ "0.8.0-0")
+(def +version+ "0.8.1-0")
 
 (task-options!
  pom {:project 'rum-mdl
       :version +version+
-      :description "Reusable mdl components library for rum"
+      :description "Reusable material-design-lite components for rum"
       :url "https://github.com/aJchemist/rum-mdl"
       :scm {:url "https://github.com/aJchemist/rum-mdl"}
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  push {:repo "deploy-clojars"})
 
 (deftask index-html
-  [t title TITLE str "the title of index.html"
-   p head  HEAD  edn "append to <head>"
-   b body  BODY  edn "append to <body>"]
+  [t title  TITLE  str "the title of index.html"
+   m meta   META   edn "append to <head>"
+   b body   BODY   edn "append to <body>"
+   s script SCRIPT edn "append to <body>"]
   (let [tmp (tmp-dir!)
         out (jio/file tmp "index.html")
         env (update (get-env) :dependencies conj
@@ -67,8 +68,8 @@
     (info "Generating %s index.html...\n" title)
     (->>
         (pod/with-eval-in pod
-          (require 'hiccup.core 'rum.core)
-          (hiccup.core/html
+          (require '[hiccup.core :refer [html]])
+          (html
            "<!doctype html>"
            [:html
             [:head
@@ -77,10 +78,10 @@
              [:meta {:http-equiv "content-type" :content "text/html;"}]
              [:meta {:name "viewport" :content "width=device-width,initial-scale=1.0,user-scalable=yes"}]
              [:meta {:name "title" :content ~title}]
-             (map identity ~head)]
+             (map identity ~meta)]
             [:body {:tabindex "-1"}
-             (rum.core/render-html [:div#app])
-             (map identity ~body)]]))
+             (map identity ~body)
+             (map identity ~script)]]))
         (spit out))
     (with-pre-wrap fileset
       (-> fileset (add-asset tmp) commit!))))
@@ -95,7 +96,7 @@
     (with-pre-wrap fileset
       (require ns-sym)
       (let [{output-to :output-to} opts
-            output-to (if output-to (get-path output-to) "app.css")
+            output-to (if output-to (get-path output-to) "rum-mdl-examples.css")
             output-to (.getPath (jio/file tmp output-to))
             cssfn     (ns-resolve ns-sym cssfn)]
         (-> opts
@@ -103,19 +104,18 @@
           (cssfn)))
       (-> fileset (add-asset tmp) commit!))))
 
-(task-options!
- index-html
- {:title "rum-mdl examples"
-  :head  [[:link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.min.css"}]
-          [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
-          [:link {:rel "stylesheet" :href "material.min.inc.css"}]
-          [:link {:rel "stylesheet" :href "app.css"}]]
-  :body  [[:script {:src "app.js"}]
-          [:script "window.onload=rum.mdl.examples.onload;"]]})
-
 (deftask ^:private examples-asset []
+  (require '[rum.core :as rum] '[rum.mdl.examples :as examples])
   (comp
-   (index-html)
+   (index-html
+    :title  "rum-mdl examples"
+    :meta   [[:link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.min.css"}]
+             [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
+             [:link {:rel "stylesheet" :href "material.min.inc.css"}]
+             [:link {:rel "stylesheet" :href "rum-mdl-examples.css"}]]
+    :body   [[:div#examples ((r rum/render-html) ((r examples/chrome)))]]
+    :script [[:script {:src "rum-mdl-examples.js"}]
+             [:script "window.onload=rum.mdl.examples.onload;"]])
    (sift :add-jar {'cljsjs/material #".*.css$"})
    (sift :move {#".*/material.min.inc.css" "material.min.inc.css"})
    (sift :invert true :include #{#"cljsjs"})
@@ -132,7 +132,7 @@
    ((r figwheel)
     :all-builds [{:id "dev"
                   :compiler (->> {:main 'rum.mdl.examples
-                                  :output-to "app.js"}
+                                  :output-to "rum-mdl-examples.js"}
                               (merge none-opts))
                   :figwheel {:build-id "dev"
                              :on-jsload 'rum.mdl.examples/main}}]
@@ -151,7 +151,7 @@
   (require '[adzerk.boot-cljs :refer [cljs]])
   (comp
    ((r cljs)
-    :ids #{"app"}
+    :ids #{"rum-mdl-examples"}
     :optimizations :advanced
     :compiler-options (dissoc simple-opts :optimizations))
    (examples-asset)
