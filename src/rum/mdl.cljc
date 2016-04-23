@@ -157,7 +157,8 @@
 
 #?(:clj
    (defmacro mdl
-     {:style/indent [1]}
+     {:style/indent [1]
+      :arglists '([tag? attrs? & contents])}
      [& xs]
      (let [[tag]    (take-while keyword? xs)
            tag      (if tag tag :div)
@@ -293,6 +294,25 @@
 ;;; tables
 
 ;;; textfields
+
+(defc textfield < (rum-mdl :textfield) component-handler rum/static
+  [& [attrs contents]]
+  [:.mdl-textfield.mdl-js-textfield attrs contents])
+
+(defmdl textfield-input :textfield [attrs [content]]
+  [:input.mdl-textfield__input attrs content])
+
+(defmdl textfield-label :textfield [attrs [content]]
+  [:label.mdl-textfield__label attrs content])
+
+(defmdl textfield-error :textfield [attrs [content]]
+  [:span.mdl-textfield__error attrs content])
+
+(defmdl textfield-textarea :textfield [attrs [content]]
+  [:textarea.mdl-textfield__input attrs content])
+
+(defmdl textfield-expandable-holder :textfield [attrs contents]
+  (v [:.mdl-input__expandable-holder attrs] contents))
 
 ;;; tooltips
 
