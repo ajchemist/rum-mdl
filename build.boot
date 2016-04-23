@@ -1,4 +1,5 @@
 (set-env!
+ :source-paths #{"src" "examples"}
  :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
 
@@ -123,7 +124,6 @@
         :opts  {:pretty-print? false})))
 
 (deftask dev []
-  (set-env! :source-paths #{"src" "examples"})
   (require 'boot-figwheel
            '[pandeiro.boot-http :refer [serve]])
   (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})

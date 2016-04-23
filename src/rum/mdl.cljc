@@ -8,9 +8,11 @@
    #?(:cljs
       [cljsjs.material])))
 
-(def mdl-aliases
-  {:default {}
-   :badge {:no-background :mdl-badge--no-background
+(def mdl-required
+  {:button "mdl-button mdl-js-button"})
+
+(def mdl-optional
+  {:badge {:no-background :mdl-badge--no-background
            :overlap       :mdl-badge--overlap
            ;; custom
            :icon          :material-icons}
@@ -32,6 +34,34 @@
             :no-drawer-button         :mdl-layout--no-drawer-button
             :no-desktop-drawer-button :mdl-layout--no-desktop-drawer-button}
 
+   :grid {:no-spacing :mdl-grid--no-spacing}
+
+   :cell (apply
+          hash-map
+          :stretch      :mdl-cell--stretch
+          :top          :mdl-cell--top
+          :middle       :mdl-cell--middle
+          :bottom       :mdl-cell--bottom
+          :hide-desktop :mdl-cell--hide-desktop
+          :hide-tablet  :mdl-cell--hide-tablet
+          :hide-phone   :mdl-cell--hide-phone
+          (reduce
+           conj
+           (flatten
+            (for [[x y] [["" 12] ["-desktop" 12] ["-tablet" 8] ["-phone" 4]]]
+              (reduce
+               conj
+               (for [z (map str (range 1 (inc y)))]
+                 [(keyword (str z x)) (keyword (str "mdl-cell--" z "-col" x))])
+               (for [z (map #(str % "-offset") (range 1 y))
+                     :let [z (str z x)]]
+                 [(keyword z) (keyword (str "mdl-cell--" z))]))))
+           (flatten
+            (for [x (range 1 13) :let [x (str "order-" x)]]
+              (for [y ["" "-desktop" "-tablet" "-phone"]
+                    :let [y (str x y)]]
+                [(keyword y) (keyword (str "mdl-cell--" y))])))))
+
    :header {:scroll    :mdl-layout__header--scroll
             :waterfall :mdl-layout__header--waterfall}
 
@@ -40,7 +70,9 @@
 
    :textfield {:floating-label :mdl-textfield--floating-label
                :expandable     :mdl-textfield--expandable
-               :align-right    :mdl-textfield--align-right}})
+               :align-right    :mdl-textfield--align-right} 
+
+   nil {}})
 
 (defn- v [val xs] (reduce conj val xs))
 
@@ -50,7 +82,7 @@
       new
       (str "mdl-" (name k)))))
 
-(defn- attrs-contents [xs]
+(defn attrs-contents [xs]
   (let [[attrs]  xs
         map?     (map? attrs)
         attrs    (if map? attrs {})
@@ -58,25 +90,35 @@
     [attrs contents]))
 
 (defn contents-with-key [contents & [key]]
-  (for [e contents :let [key (gensym key)]]
-    (cond
-      (vector? e)
-      (if (map? (get e 1))
-        (assoc-in e [1 :key] key)
-        (apply vector (first e) {:key key} (rest e)))
-      (string? e)
-      [:span {:key key} e]
-      :else (rum/with-key e key))))
+  (if (< (count contents) 2)
+    (first contents)
+    (for [e contents :let [key (gensym key)]]
+      (cond
+        (vector? e)
+        (if (map? (get e 1))
+          (assoc-in e [1 :key] key)
+          (apply vector (first e) {:key key} (rest e)))
+        (string? e)
+        [:span {:key key} e]
+        :else (rum/with-key e key)))))
 
 (defn mdl-attrs
   ([attrs]
-   (mdl-attrs attrs :default))
-  ([{:keys [mdl] :as attrs} aliaskey]
+   (mdl-attrs attrs nil))
+  ([{:keys [mdl] :as attrs} key]
    (if (empty? mdl)
      attrs
      (-> attrs
-       (update :class classname (rename-kw mdl (mdl-aliases aliaskey)))
+       (update :class classname (rename-kw mdl (mdl-optional key)))
        (dissoc :mdl)))))
+
+(defn rum-mdl-attrs
+  [{:keys [rum-mdl] :as attrs}]
+  (if rum-mdl
+    (-> attrs
+      (update :class classname (mdl-required rum-mdl))
+      (dissoc :rum-mdl))
+    attrs))
 
 (defn rum-mdl [key]
   {:will-mount
@@ -84,14 +126,13 @@
      ;; type of rum/args is cljs.core/IndexedSeq
      ;; args: [attr? content*]
      (let [[attrs contents] (attrs-contents args)
-           contents (if (< 1 (count contents))
-                      (contents-with-key contents key)
-                      contents)
-           attrs    (mdl-attrs attrs key)]
+           attrs    (mdl-attrs attrs key)
+           contents (contents-with-key contents key)]
        #_(println (map type contents))
        (assoc state :rum/args [attrs contents])))})
 
 (def component-handler
+  "only for `mdl-js-*' classed component"
   {:did-mount
    (fn [state]
      (let [comp (:rum/react-component state)]
@@ -108,6 +149,22 @@
            #js[ (js/ReactDOM.findDOMNode comp) ])))
      state)})
 
+#?(:clj
+   (defmacro mdl
+     {:style/indent [1]}
+     [& xs]
+     (let [[tag]    (take-while keyword? xs)
+           tag      (if tag tag :div)
+           xs       (drop-while keyword? xs)
+           attrs    (reduce merge (take-while map? xs))
+           contents (drop-while (complement sequential?) xs)]
+       `[~tag ~(-> attrs (rum-mdl-attrs) (mdl-attrs (:rum-mdl attrs)))
+         ~@(for [e contents]
+             (let [[_ attrs] e]
+               (if (map? attrs)
+                 (update e 1 mdl-attrs (:rum-mdl attrs))
+                 e)))])))
+
 (defn icon
   ([font] (icon nil font))
   ([attrs font] [:i.material-icons attrs font]))
@@ -115,30 +172,34 @@
 ;;; badges
 
 (defn badge-attrs [attrs]
-  (mdl-attrs attrs :badge))
+  (-> attrs
+    (rum-mdl-attrs)
+    (mdl-attrs :badge)))
 
 (defc badge < (rum-mdl :badge) rum/static
-  [& [attrs [content]]]
+  [& [attrs content]]
   [:span.mdl-badge attrs content])
 
 ;;; buttons
 
 (defn button-attrs [attrs]
-  (mdl-attrs attrs :button))
+  (-> attrs
+    (rum-mdl-attrs)
+    (mdl-attrs :button)))
 
 (defc button < (rum-mdl :button) component-handler rum/static
-  [& [attrs [content]]]
+  [& [attrs content]]
   [:button.mdl-button.mdl-js-button attrs content])
 
 ;;; cards
 
-(defc card < (rum-mdl :card) component-handler rum/static
+(defc card < (rum-mdl :card) rum/static
   [& [attrs content]]
   [:.mdl-card attrs content])
 
 (defn card-title
   [title]
-  [:.mdl-card__title 
+  [:.mdl-card__title
    (if (string? title)
      [:h2.mdl-card__title-text title]
      title)])
@@ -180,7 +241,7 @@
   [:nav.mdl-navigation attrs contents])
 
 (defn link "<a>"
-  ^{:arglists '([& [attrs content]])}
+  {:arglists '([& [attrs content]])}
   [& xs]
   (v [:a.mdl-navigation__link] xs))
 
@@ -191,6 +252,14 @@
 (defn main-content
   [& xs]
   (v [:main.mdl-layout__content] xs))
+
+(defc grid < (rum-mdl :grid) rum/static
+  [& [attrs contents]]
+  [:.mdl-grid attrs contents])
+
+(defc cell < (rum-mdl :cell) rum/static
+  [& [attrs contents]]
+  [:.mdl-cell attrs contents])
 
 ;;; lists
 
