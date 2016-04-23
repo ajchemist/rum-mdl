@@ -10,6 +10,7 @@
 (def mdl-required
   {:button "mdl-button mdl-js-button"
    :checkbox "mdl-checkbox mdl-js-checkbox"
+   :slider "mdl-slider mdl-js-slider"
    :table "mdl-data-table mdl-js-data-table"
    :textfield "mdl-textfield mdl-js-textfield"})
 
@@ -321,6 +322,14 @@
 
 ;;; sliders
 
+(defc slider < (rum-mdl :slider) component-handler rum/static
+  [& [attrs]]
+  [:input.mdl-slider.mdl-js-slider
+   (-> {:type "range"
+        :on-change (fn [_])
+        :min "0" :max "100"}
+     (merge attrs))])
+
 ;;; snackbar
 
 ;;; toggles
@@ -382,7 +391,7 @@
   [:.mdl-textfield.mdl-js-textfield attrs contents])
 
 (defmdl textfield-input :textfield [attrs [content]]
-  [:input.mdl-textfield__input attrs content])
+  [:input.mdl-textfield__input (merge {:type "text"} attrs) content])
 
 (defmdl textfield-label :textfield [attrs [content]]
   [:label.mdl-textfield__label attrs content])
@@ -391,7 +400,7 @@
   [:span.mdl-textfield__error attrs content])
 
 (defmdl textfield-textarea :textfield [attrs [content]]
-  [:textarea.mdl-textfield__input attrs content])
+  [:textarea.mdl-textfield__input (merge {:type "text"} attrs) content])
 
 (defmdl textfield-expandable-holder :textfield [attrs contents]
   (v [:.mdl-textfield__expandable-holder attrs] contents))
