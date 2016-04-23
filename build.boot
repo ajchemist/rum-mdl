@@ -50,7 +50,7 @@
 (task-options!
  pom {:project 'rum-mdl
       :version +version+
-      :description "Reusable material-design-lite react components for rum"
+      :description "Reusable material-design-lite react components written with rum"
       :url "https://github.com/aJchemist/rum-mdl"
       :scm {:url "https://github.com/aJchemist/rum-mdl"}
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}

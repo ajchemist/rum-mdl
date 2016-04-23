@@ -6,5 +6,18 @@
 #+LINK: react https://facebook.github.io/react/
 #+LINK: mdl   https://getmdl.io
 
-Reusable [[mdl][material-design-lite]] [[react]] components for [[rum]]
+Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
+** Using Rum-MDL
+
+#+NAME: dependencies
+#+begin_src clojure
+  [rum "0.8.1"]
+  [rum-mdl "0.0.1"]                       ; CAUTION! there is no clojars for now
+#+end_src
+
+#+NAME: require
+#+begin_src clojure
+  (require '[rum.core :as rum]
+           '[rum.mdl  :as mdl])
+#+end_src
