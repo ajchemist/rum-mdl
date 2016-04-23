@@ -14,7 +14,7 @@
    [rum.mdl.examples.snackbar]
    [rum.mdl.examples.toggles]
    [rum.mdl.examples.tables]
-   [rum.mdl.examples.fields]
+   [rum.mdl.examples.textfields]
    [rum.mdl.examples.tooltips]))
 
 #?(:cljs (enable-console-print!))
@@ -46,7 +46,7 @@
    (link #'rum.mdl.examples.snackbar/examples "https://getmdl.io/assets/comp_snackbar.png" "Snackbar")
    (link #'rum.mdl.examples.toggles/examples "https://getmdl.io/assets/comp_toggles.png" "Toggles")
    (link #'rum.mdl.examples.tables/examples "https://getmdl.io/assets/comp_tables.png" "Tables")
-   (link #'rum.mdl.examples.fields/examples "https://getmdl.io/assets/comp_textfields.png" "Fields")
+   (link #'rum.mdl.examples.textfields/examples "https://getmdl.io/assets/comp_textfields.png" "Text Fields")
    (link #'rum.mdl.examples.tooltips/examples "https://getmdl.io/assets/comp_tooltips.png" "Tooltips")])
 
 (rum/defc content []

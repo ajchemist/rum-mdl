@@ -18,6 +18,10 @@
   [name binding & styles]
   `(defn ~name [opts# ~@binding] (garden.core/css opts# ~@styles)))
 
+(defcssfn url)
+
+(defrule heading :h1 :h2 :h3 :h4 :h5 :h6 :h7)
+
 (defn box-shadow []
   {:box-shadow
    [[0 :4px :5px  0     "rgba(0,0,0,.14)"]
@@ -32,8 +36,9 @@
    {:margin 0
     :overflow :visible}
    [:#content
-    [:.mdl-cell
-     {:display :flex}]]])
+    [:>
+     [:.mdl-cell
+      {:display :flex}]]]])
 
 (defstylesfn components-nav []
   [:aside.components-nav
@@ -76,15 +81,48 @@
     {:display "block"
      :min-height "800px"}]])
 
+(defstylesfn demo []
+  [:.demo
+   {:display "block"
+    :background-color "#fafafa"}
+   [:.intro
+    {:margin [["30px" 0 "60px" "32px"]]}
+    [:h3
+     {:font-size "16px"
+      :font-weight "500"
+      :margin-top "80px"
+      :text-transform "uppercase"}]
+    [:p
+     {:margin {:top "16px" :bottom "16px"}
+      :max-width "640px"
+      :font {:size "13px"}}]]
+   [:.snippet {:margin [[0 "-16px" "84px" "-16px"]]}
+    [:.demos :.captions {:display "table-row"}]
+    [:.padding :.caption {:text-align "center" :display "table-cell" :vertical-align "middle" :margin "0"}]
+    [:.header
+     {:display "table" :border-collapse "collapse" :border-spacing "0"}
+     [:.demos
+      [:.padding {:width "50%"}]
+      [:.demo {:padding "0 40px 40px" :display "table-cell" :text-align "center" :vertical-align "middle" :margin "0"}]]
+     [:.captions {:background-color "#fff" :height "48px"}
+      [:.padding {:text-align "center" :padding "0"}]
+      [:.caption {:font-size "13px" :padding "0 40px" :white-space "nowrap" :position "relative"}]]]
+    [:.source {:position "relative" :overflow "hidden"
+               :background " #f5f2f0"
+               :padding {:top "1em" :bottom "1em"}}
+     [:pre {:margin {:left "45px" :right "45px"}}]]]])
+
 (defstylesheetfn css []
   (layout)
   (components-nav)
-  (mount))
+  (mount)
+  (demo))
 
 (comment
   (css {})
   (css {:vendors ["webkit"] :output-to "target/rum-mdl-examples.css"})
 
   (garden.core/css [:a (box-shadow)])
+  (garden.core/css (heading {:a 1}))
 
   )
