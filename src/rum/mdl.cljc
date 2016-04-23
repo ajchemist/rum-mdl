@@ -3,8 +3,6 @@
   (:require
    [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
                          :cljs [:refer-macros [defc defcc defcs]])]
-   [#?(:clj  sablono.compiler
-       :cljs sablono.core) :as s]
    [classname.core :refer [classname]]
    #?(:cljs
       [cljsjs.material])))
@@ -12,6 +10,7 @@
 (def mdl-required
   {:button "mdl-button mdl-js-button"
    :checkbox "mdl-checkbox mdl-js-checkbox"
+   :table "mdl-data-table mdl-js-data-table"
    :textfield "mdl-textfield mdl-js-textfield"})
 
 (def mdl-optional
@@ -77,6 +76,11 @@
    :nav {:large-screen-only :mdl-layout--large-screen-only
          :small-screen-only :mdl-layout--small-screen-only}
 
+   :table {:selectable  :mdl-data-table--selectable
+           :ascending   :mdl-data-table__header--sorted-ascending
+           :descending  :mdl-data-table__header--sorted-descending
+           :non-numeric :mdl-data-table__cell--non-numeric}
+   
    :textfield {:floating-label :mdl-textfield--floating-label
                :expandable     :mdl-textfield--expandable
                :align-right    :mdl-textfield--align-right} 
@@ -333,6 +337,44 @@
 
 ;;; tables
 
+(defc table < (rum-mdl :table) component-handler rum/static
+  [& [attrs contents]]
+  [:table.mdl-data-table.mdl-js-data-table attrs contents])
+
+(defn thead
+  ([heads]
+   (thead nil heads))
+  ([vattrs heads]
+   [:thead
+    (let [idx-attrs
+          (into {} (comp
+                    (map-indexed #(vector %1 %2))
+                    (remove #(nil? (second %))))
+                vattrs)]
+      (v [:tr]
+         (map #(if-let [attrs (idx-attrs %1)]
+                 [:th (mdl-attrs attrs :table) %2]
+                 [:th %2])
+              (range) heads)))]))
+
+(defn tbody
+  ([data]
+   [tbody nil data])
+  ([vattrs data]
+   [:tbody
+    (contents-with-key
+     (let [idx-attrs
+           (into {} (comp
+                     (map-indexed #(vector %1 %2))
+                     (remove #(nil? (second %))))
+                 vattrs)]
+       (for [row data]
+         (v [:tr]
+            (map #(if-let [attrs (idx-attrs %1)]
+                    [:td (mdl-attrs attrs :table) %2]
+                    [:td %2])
+                 (range) row)))))]))
+
 ;;; textfields
 
 (defc textfield < (rum-mdl :textfield) component-handler rum/static
@@ -357,7 +399,5 @@
 ;;; tooltips
 
 (comment
-
-  (rum/render-html (nav [[:a {:href ""} "links"]]))
 
   )
