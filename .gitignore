@@ -1,0 +1,7 @@
+/src
+/examples
+/scratch
+/target
+/target-ghpage
+*.log
+.nrepl-port
