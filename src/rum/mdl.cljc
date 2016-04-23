@@ -312,7 +312,7 @@
   [:textarea.mdl-textfield__input attrs content])
 
 (defmdl textfield-expandable-holder :textfield [attrs contents]
-  (v [:.mdl-input__expandable-holder attrs] contents))
+  (v [:.mdl-textfield__expandable-holder attrs] contents))
 
 ;;; tooltips
 

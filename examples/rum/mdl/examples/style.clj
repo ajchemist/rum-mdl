@@ -110,7 +110,9 @@
     [:.source {:position "relative" :overflow "hidden"
                :background " #f5f2f0"
                :padding {:top "1em" :bottom "1em"}}
-     [:pre {:margin {:left "45px" :right "45px"}}]]]])
+     [:pre {:margin {:left "45px" :right "45px"}}]]]]
+  [:.demo
+   [:.mdl-textfield--expandable {:width "150px"}]])
 
 (defstylesheetfn css []
   (layout)
