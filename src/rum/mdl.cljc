@@ -11,6 +11,7 @@
 
 (def mdl-required
   {:button "mdl-button mdl-js-button"
+   :checkbox "mdl-checkbox mdl-js-checkbox"
    :textfield "mdl-textfield mdl-js-textfield"})
 
 (def mdl-optional
@@ -29,6 +30,8 @@
             :ripple   :mdl-js-ripple-effect}
 
    :card   {:border :mdl-card--border}
+
+   :checkbox {:ripple :mdl-js-ripple-effect}
 
    :layout {:fixed-tabs               :mdl-layout--fixed-tabs
             :fixed-drawer             :mdl-layout--fixed-drawer
@@ -64,6 +67,10 @@
                     :let [y (str x y)]]
                 [(keyword y) (keyword (str "mdl-cell--" y))])))))
 
+   :progress {:indeterminate :mdl-progress__indeterminate}
+   
+   :spinner {:single-color :mdl-spinner--single-color}
+
    :header {:scroll    :mdl-layout__header--scroll
             :waterfall :mdl-layout__header--waterfall}
 
@@ -74,7 +81,7 @@
                :expandable     :mdl-textfield--expandable
                :align-right    :mdl-textfield--align-right} 
 
-   nil {}})
+   nil {:ripple :mdl-js-ripple-effect}})
 
 (defn- v [val xs] (reduce conj val xs))
 
@@ -91,7 +98,7 @@
         contents (if map? (rest xs) xs)]
     [attrs contents]))
 
-(defn contents-with-key [contents & [key]]
+(defn- contents-with-key [contents & [key]]
   (if (< (count contents) 2)
     (first contents)
     (for [e contents :let [key (gensym key)]]
@@ -283,6 +290,29 @@
 
 ;;; loading
 
+(defc progress < (rum-mdl :progress)
+  {:did-mount
+   (fn [{[{:keys [progress buffer]}] :rum/args
+         comp :rum/react-component :as state}]
+     #?(:cljs
+        (let [dom (js/ReactDOM.findDOMNode comp)]
+          (->> #(this-as this
+                  (when progress
+                    (.. this -MaterialProgress (setProgress progress)))
+                  (when buffer
+                    (.. this -MaterialProgress (setBuffer buffer))))
+            (.addEventListener dom "mdl-componentupgraded"))))
+     state)}
+  component-handler rum/static
+  [& [attrs]]
+  [:.mdl-progress.mdl-js-progress attrs])
+
+(defc spinner < (rum-mdl :spinner) component-handler rum/static
+  [& [attrs]]
+  [:.mdl-spinner.mdl-js-spinner
+   (let [{:keys [is-active]} attrs]
+     (update attrs :class classname {:is-active is-active}))])
+
 ;;; menus
 
 ;;; sliders
@@ -290,6 +320,16 @@
 ;;; snackbar
 
 ;;; toggles
+
+(defc checkbox < (rum-mdl :checkbox) component-handler rum/static
+  [& [attrs contents]]
+  [:label.mdl-checkbox.mdl-js-checkbox attrs contents])
+
+(defmdl checkbox-input :checkbox [attrs [content]]
+  [:input.mdl-checkbox__input (merge {:type "checkbox"} attrs) content])
+
+(defmdl checkbox-label :checkbox [attrs [content]]
+  [:span.mdl-checkbox__label attrs content])
 
 ;;; tables
 
