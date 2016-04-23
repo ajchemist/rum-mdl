@@ -1,0 +1,10 @@
+#+STARTUP: content
+#+TITLE: rum-mdl
+#+AUTHOR: aJchemist
+#+UPDATE: Sun Apr 10 09:33:46 2016
+#+LINK: rum   https://github.com/tonsky/rum
+#+LINK: react https://facebook.github.io/react/
+#+LINK: mdl   https://getmdl.io
+
+Reusable [[mdl][material-design-lite]] [[react]] components for [[rum]]
+
