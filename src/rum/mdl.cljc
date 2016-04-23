@@ -262,8 +262,8 @@
   [& [attrs contents]]
   [:nav.mdl-navigation attrs contents])
 
-(defmdl link "<a>" [attrs [content]]
-  [:a.mdl-navigation__link attrs content])
+(defmdl link "<a>" [attrs contents]
+  [:a.mdl-navigation__link attrs (contents-with-key contents :link)])
 
 (defmdl drawer :drawer [attrs contents]
   (v [:.mdl-layout__drawer attrs] contents))
