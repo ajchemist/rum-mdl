@@ -1,4 +1,5 @@
 (ns rum.mdl
+  #?(:cljs (:require-macros [rum.mdl :refer [defmdl]]))
   (:require
    [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
                          :cljs [:refer-macros [defc defcc defcs]])]
@@ -9,7 +10,8 @@
       [cljsjs.material])))
 
 (def mdl-required
-  {:button "mdl-button mdl-js-button"})
+  {:button "mdl-button mdl-js-button"
+   :textfield "mdl-textfield mdl-js-textfield"})
 
 (def mdl-optional
   {:badge {:no-background :mdl-badge--no-background
@@ -82,7 +84,7 @@
       new
       (str "mdl-" (name k)))))
 
-(defn attrs-contents [xs]
+(defn- attrs-contents [xs]
   (let [[attrs]  xs
         map?     (map? attrs)
         attrs    (if map? attrs {})
@@ -131,6 +133,44 @@
        #_(println (map type contents))
        (assoc state :rum/args [attrs contents])))})
 
+#?(:clj
+   (defmacro defmdl
+     {:arglists '([name mdl-key? docstring? binding & body])}
+     [& xs]
+     (let [[name]    xs
+           xs        (rest xs)
+           ys        (take-while (complement vector?) xs)
+           mdl-key   (first (filter keyword? ys))
+           docstring (first (filter string? ys))
+           docstring (if docstring docstring "")
+           xs        (drop-while (complement vector?) xs)
+           binding   (first xs)
+           a-binding (first binding)
+           body      (rest xs)
+           arglists  '([& contents] [attrs & contents])]
+       `(defn ~name ~docstring
+          {:arglists '~arglists}
+          [& xs#]
+          (let [~binding   (attrs-contents xs#)
+                ~a-binding (mdl-attrs ~a-binding ~mdl-key)]
+            ~@body)))))
+
+#?(:clj
+   (defmacro mdl
+     {:style/indent [1]}
+     [& xs]
+     (let [[tag]    (take-while keyword? xs)
+           tag      (if tag tag :div)
+           xs       (drop-while keyword? xs)
+           attrs    (reduce merge (take-while map? xs))
+           contents (drop-while (complement sequential?) xs)]
+       `[~tag ~(-> attrs (rum-mdl-attrs) (mdl-attrs (:rum-mdl attrs)))
+         ~@(for [e contents]
+             (let [[_ attrs] e]
+               (if (map? attrs)
+                 (update e 1 mdl-attrs (:rum-mdl attrs))
+                 e)))])))
+
 (def component-handler
   "only for `mdl-js-*' classed component"
   {:did-mount
@@ -148,22 +188,6 @@
           (js/componentHandler.downgradeElements
            #js[ (js/ReactDOM.findDOMNode comp) ])))
      state)})
-
-#?(:clj
-   (defmacro mdl
-     {:style/indent [1]}
-     [& xs]
-     (let [[tag]    (take-while keyword? xs)
-           tag      (if tag tag :div)
-           xs       (drop-while keyword? xs)
-           attrs    (reduce merge (take-while map? xs))
-           contents (drop-while (complement sequential?) xs)]
-       `[~tag ~(-> attrs (rum-mdl-attrs) (mdl-attrs (:rum-mdl attrs)))
-         ~@(for [e contents]
-             (let [[_ attrs] e]
-               (if (map? attrs)
-                 (update e 1 mdl-attrs (:rum-mdl attrs))
-                 e)))])))
 
 (defn icon
   ([font] (icon nil font))
@@ -207,17 +231,14 @@
 (defn card-text [text]
   [:.mdl-card__supporting-text text])
 
-(defn card-media [& xs]
-  (let [[attrs [content]] (attrs-contents xs)]
-    [:.mdl-card__media (mdl-attrs attrs :card) content]))
+(defmdl card-media :card [attrs [content]]
+  [:.mdl-card__media attrs content])
 
-(defn card-action [& xs]
-  (let [[attrs [content]] (attrs-contents xs)]
-    [:.mdl-card__actions (mdl-attrs attrs :card) content]))
+(defmdl card-action :card [attrs [content]]
+  [:.mdl-card__actions attrs content])
 
-(defn card-menu [& xs]
-  (let [[attrs [content]] (attrs-contents xs)]
-    [:.mdl-card__menu (mdl-attrs attrs :card) content]))
+(defmdl card-menu :card [attrs [content]]
+  [:.mdl-card__menu attrs content])
 
 ;;; dialogs
 
@@ -240,18 +261,14 @@
   [& [attrs contents]]
   [:nav.mdl-navigation attrs contents])
 
-(defn link "<a>"
-  {:arglists '([& [attrs content]])}
-  [& xs]
-  (v [:a.mdl-navigation__link] xs))
+(defmdl link "<a>" [attrs [content]]
+  [:a.mdl-navigation__link attrs content])
 
-(defn drawer
-  [& xs]
-  (v [:.mdl-layout__drawer] xs))
+(defmdl drawer :drawer [attrs contents]
+  (v [:.mdl-layout__drawer attrs] contents))
 
-(defn main-content
-  [& xs]
-  (v [:main.mdl-layout__content] xs))
+(defmdl main-content :layout [attrs contents]
+  (v [:main.mdl-layout__content attrs] contents))
 
 (defc grid < (rum-mdl :grid) rum/static
   [& [attrs contents]]
@@ -275,7 +292,7 @@
 
 ;;; tables
 
-;;; fields
+;;; textfields
 
 ;;; tooltips
 
