@@ -113,7 +113,10 @@
      [:pre {:margin {:left "45px" :right "45px"}}]]]]
   [:.demo
    [:.mdl-textfield--expandable {:width "150px"}]
-   [:.mdl-slider {:width "30vw" :max-width "260px"}]])
+   [:.mdl-slider {:width "30vw" :max-width "260px"}]
+   [:.mdl-snackbar
+    [" ~ "
+     [:button {:width "175px"}]]]])
 
 (defstylesheetfn css []
   (layout)

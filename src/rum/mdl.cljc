@@ -136,7 +136,13 @@
     attrs))
 
 (defn rum-mdl [key]
-  {:will-mount
+  {:transfer-state
+   (fn [_ {args :rum/args :as new}]
+     (let [[attrs contents] (attrs-contents args)
+           attrs    (mdl-attrs attrs key)
+           contents (contents-with-key contents key)]
+       (assoc new :rum/args [attrs contents])))
+   :will-mount
    (fn [{args :rum/args :as state}]
      ;; type of rum/args is cljs.core/IndexedSeq
      ;; args: [attr? content*]
@@ -353,6 +359,21 @@
 
 ;;; snackbar
 
+(defc snackbar < component-handler rum/static
+  {:did-mount
+   (fn [state]
+     #?(:cljs
+        (let [this (:rum/react-component state)
+              dom  (:mdl/dom state)
+              m    (aget dom "MaterialSnackbar")]
+          (aset this "show-snackbar"
+                (fn [o] (. m (showSnackbar o))))))
+     state)}
+  [& [{:keys [action] :as attrs} contents]]
+  [:.mdl-snackbar.mdl-js-snackbar attrs
+   [:.mdl-snackbar__text]
+   [:button.mdl-snackbar__action (merge {:type "button"} action)]])
+
 ;;; toggles
 
 (defn toggle
@@ -362,7 +383,8 @@
    (fn [state]
      #?(:cljs
         (let [{[{:keys [checked disabled mdl]}] :rum/args
-               dom :mdl/dom} state
+               this :rum/react-component
+               dom  :mdl/dom} state
               m (aget dom component)]
           (when disabled                ; (. m (enable))
             (. m (disable)))
@@ -377,15 +399,8 @@
                   ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
               (upgrade-element ripple)
               (listen-component-downgraded dom
-                #(downgrade-elements ripple))))
-          (assoc state :mdl/component m))
-        :clj state))
-   :will-unmount
-   (fn [state]
-     #?(:cljs
-        (dissoc state :mdl/component)
-        :clj
-        state))})
+                #(downgrade-elements ripple))))))
+     state)})
 
 (defc checkbox < component-handler (toggle "MaterialCheckbox") 
   [{:keys [input label] :as attrs}]
