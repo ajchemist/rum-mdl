@@ -7,6 +7,14 @@
    #?(:cljs
       [cljsjs.material])))
 
+(defn- v [val xs] (reduce conj val xs))
+
+(defn- rename-kw [ks kmap]
+  (for [k ks]
+    (if-let [new (kmap k)]
+      new
+      (str "mdl-" (name k)))))
+
 (def mdl-component
   {:button      "MaterialButton"
    :table       "MaterialDataTable"
@@ -82,14 +90,6 @@
                :align-right    :mdl-textfield--align-right} 
 
    nil {:ripple :mdl-js-ripple-effect}})
-
-(defn- v [val xs] (reduce conj val xs))
-
-(defn- rename-kw [ks kmap]
-  (for [k ks]
-    (if-let [new (kmap k)]
-      new
-      (str "mdl-" (name k)))))
 
 (defn- attrs-contents [xs]
   (let [[attrs]  xs
@@ -178,6 +178,16 @@
                (if (map? attrs)
                  (update e 1 mdl-attrs (:rum-mdl attrs))
                  e)))])))
+
+(defn listen-component-upgraded
+  {:style/indent 1}
+  [el callback]
+  (.addEventListener el "mdl-componentupgraded" callback))
+
+(defn listen-component-downgraded
+  {:style/indent 1}
+  [el callback]
+  (.addEventListener el "mdl-componentdowngraded" callback))
 
 (def component-handler
   "only for `mdl-js-*' classed component"
@@ -291,20 +301,18 @@
 
 ;;; loading
 
-(defc progress < (rum-mdl :progress)
+(defc progress < (rum-mdl :progress) component-handler
   {:did-mount
-   (fn [{[{:keys [progress buffer]}] :rum/args
-         comp :rum/react-component :as state}]
+   (fn [state]
      #?(:cljs
-        (let [dom (js/ReactDOM.findDOMNode comp)]
-          (->> #(this-as this
-                  (when progress
-                    (.. this -MaterialProgress (setProgress progress)))
-                  (when buffer
-                    (.. this -MaterialProgress (setBuffer buffer))))
-            (.addEventListener dom "mdl-componentupgraded"))))
-     state)}
-  component-handler rum/static
+        (let [{[{:keys [progress buffer]}] :rum/args
+               dom :mdl/dom} state
+              component (aget dom "MaterialProgress")]
+          (when progress
+            (.. component (setProgress progress)))
+          (when buffer
+            (.. component (setBuffer buffer)))))
+     state)} rum/static
   [& [attrs]]
   [:.mdl-progress.mdl-js-progress attrs])
 
@@ -351,9 +359,9 @@
             (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
                   ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
               (js/componentHandler.upgradeElement ripple)
-              (.addEventListener dom "mdl-componentdowngraded"
-                                 #(js/componentHandler.downgradeElements
-                                   #js [ ripple ]))))
+              (listen-component-downgraded dom
+                #(js/componentHandler.downgradeElements
+                  #js [ ripple ]))))
           (assoc state :mdl/component m))
         :clj state))
    :will-unmount
