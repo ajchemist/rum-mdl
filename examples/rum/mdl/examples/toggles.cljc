@@ -55,12 +55,10 @@
      {:mdl [:ripple]
       :for "switch-1"
       :input {:id "switch-1"}
-      :label "format_bold"
       :checked true})
     "Icon on"
     (mdl/switch
      {:mdl [:ripple]
       :for "switch-2"
-      :input {:id "switch-2"}
-      :label "format_italic"})
+      :input {:id "switch-2"}})
     "Icon off")))

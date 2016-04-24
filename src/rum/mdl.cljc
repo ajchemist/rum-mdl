@@ -1,4 +1,5 @@
 (ns rum.mdl
+  (:refer-clojure :exclude [list])
   #?(:cljs (:require-macros [rum.mdl :refer [defmdl]]))
   (:require
    [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
@@ -57,6 +58,17 @@
             :ripple   :mdl-js-ripple-effect}
 
    :card   {:border :mdl-card--border}
+
+   :list {:two              :mdl-list__item--two-line
+          :three            :mdl-list__item--three-line
+          :primary          :mdl-list__item-primary-content
+          :secondary        :mdl-list__item-secondary-content
+          :secondary-info   :mdl-list__item-secondary-info
+          :secondary-action :mdl-list__item-secondary-action
+          :avatar           :mdl-list__item-avatar
+          :icon             :mdl-list__item-icon
+          :sub              :mdl-list__item-sub-title
+          :body             :mdl-list__item-text-body}
 
    :menu {:top-left     :mdl-menu--top-left
           :top-right    :mdl-menu--top-right
@@ -326,6 +338,31 @@
 
 ;;; lists
 
+(defc list < (rum-mdl :list) component-handler rum/static
+  [& [attrs contents]]
+  [:ul.mdl-list attrs contents])
+
+(defn li
+  {:arglists '([attrs? secondary?])}
+  [& xs]
+  (let [[attrs [secondary]] (attrs-contents xs)
+        attrs            (mdl-attrs attrs :list)
+        {:keys [icon avatar content sub body]} attrs
+        icon     (when icon [:i.material-icons.mdl-list__item-icon icon])
+        avatar   (when avatar [:i.material-icons.mdl-list__item-avatar avatar])
+        sub      (when sub [:span.mdl-list__item-sub-title sub])
+        body     (when body [:span.mdl-list__item-text-body body])
+        attrs    (dissoc attrs :icon :avatar :content :sub :body)]
+    [:li.mdl-list__item attrs 
+     [:span.mdl-list__item-primary-content {} 
+      icon avatar content sub body]
+     (when secondary
+       (let [{:keys [info action]} secondary
+             info   (when info [:span.mdl-list__item-secondary-info info])
+             action (when action [:a.mdl-list__item-secondary-action action])]
+         [:span.mdl-list__item-secondary-content {}
+          info action]))]))
+
 ;;; loading
 
 (defc progress < (rum-mdl :progress) component-handler
@@ -414,38 +451,38 @@
         state)}))
 
 (defc checkbox < component-handler (toggle "MaterialCheckbox") 
-  [{:keys [input label] :as attrs}]
+  [{:keys [input label for] :as attrs}]
   [:label.mdl-checkbox.mdl-js-checkbox
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
    [:input.mdl-checkbox__input
-    (-> {:type "checkbox"}
+    (-> {:type "checkbox" :id for}
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
 (defc radio < component-handler (toggle "MaterialRadio") rum/static
-  [{:keys [input label] :as attrs}]
+  [{:keys [input label for] :as attrs}]
   [:label.mdl-radio.mdl-js-radio
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
    [:input.mdl-radio__button
-    (-> {:type "radio"}
+    (-> {:type "radio" :id for}
       (merge input))]
    [:span.mdl-radio__label label]])
 
 (defc icon-toggle < component-handler (toggle "MaterialIconToggle") rum/static
-  [{:keys [input label] :as attrs}]
+  [{:keys [input label for] :as attrs}]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
    [:input.mdl-icon-toggle__input
-    (-> {:type "checkbox"}
+    (-> {:type "checkbox" :id for}
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
 (defc switch < component-handler (toggle "MaterialSwitch") rum/static
-  [{:keys [input] :as attrs}]
+  [{:keys [input for] :as attrs}]
   [:label.mdl-switch.mdl-js-switch
    (-> attrs (mdl-attrs :toggle) (dissoc :input))
    [:input.mdl-switch__input
-    (-> {:type "checkbox"}
+    (-> {:type "checkbox" :id for}
       (merge input))]
    [:span.mdl-switch__label]])
 

@@ -116,7 +116,8 @@
    [:.mdl-slider {:width "30vw" :max-width "260px"}]
    [:.mdl-snackbar
     [" ~ "
-     [:button {:width "175px"}]]]])
+     [:button {:width "175px"}]]]
+   [:.mdl-list {:width "25vw" :min-width "260px"}]])
 
 (defstylesheetfn css []
   (layout)
