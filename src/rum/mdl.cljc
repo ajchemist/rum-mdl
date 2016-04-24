@@ -58,6 +58,13 @@
 
    :card   {:border :mdl-card--border}
 
+   :menu {:top-left     :mdl-menu--top-left
+          :top-right    :mdl-menu--top-right
+          :bottom-left  :mdl-menu--bottom-left
+          :bottom-right :mdl-menu--bottom-right
+          :divider      :mdl-menu__item--full-bleed-divider
+          :ripple :mdl-js-ripple-effect}
+
    :toggle {:ripple :mdl-js-ripple-effect}
 
    :layout {:fixed-tabs               :mdl-layout--fixed-tabs
@@ -213,22 +220,19 @@
 
 (def component-handler
   "only for `mdl-js-*' classed component"
-  {:did-mount
-   (fn [state]
-     #?(:cljs
+  #?(:cljs
+     {:did-mount
+      (fn [state]
         (let [rc  (:rum/react-component state)
               dom (js/ReactDOM.findDOMNode rc)]
           (upgrade-element dom)
-          (assoc state :mdl/dom dom))
-        :clj state))
-   :will-unmount
-   (fn [state]
-     #?(:cljs
+          (assoc state :mdl/dom dom)))
+      :will-unmount
+      (fn [state]
         (let [rc  (:rum/react-component state)
               dom (js/ReactDOM.findDOMNode rc)]
           (downgrade-elements dom)
-          (dissoc state :mdl/dom))
-        :clj state))})
+          (dissoc state :mdl/dom)))}))
 
 (defn icon
   ([font] (icon nil font))
@@ -347,6 +351,13 @@
 
 ;;; menus
 
+(defc ^{:style/indent 1} menu < (rum-mdl :menu) component-handler rum/static
+  [& [attrs contents]]
+  [:ul.mdl-menu.mdl-js-menu attrs contents])
+
+(defmdl menu-item :menu [attrs [content]]
+  [:li.mdl-menu__item attrs content])
+
 ;;; sliders
 
 (defc slider < (rum-mdl :slider) component-handler rum/static
@@ -379,9 +390,9 @@
 (defn toggle
   "workaround mixin"
   [component]
-  {:did-mount
-   (fn [state]
-     #?(:cljs
+  #?(:cljs
+     {:did-mount
+      (fn [state]
         (let [{[{:keys [checked disabled mdl]}] :rum/args
                this :rum/react-component
                dom  :mdl/dom} state
@@ -399,8 +410,8 @@
                   ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
               (upgrade-element ripple)
               (listen-component-downgraded dom
-                #(downgrade-elements ripple))))))
-     state)})
+                                           #(downgrade-elements ripple)))))
+        state)}))
 
 (defc checkbox < component-handler (toggle "MaterialCheckbox") 
   [{:keys [input label] :as attrs}]
@@ -453,11 +464,10 @@
                               (map-indexed #(vector %1 %2))
                               (remove #(nil? (second %))))
                           vattrs)]
-      (v [:tr]
-         (map #(if-let [attrs (idx-attrs %1)]
-                 [:th (mdl-attrs attrs :table) %2]
-                 [:th %2])
-              (range) heads)))]))
+      (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
+                       [:th (mdl-attrs attrs :table) %2]
+                       [:th %2])
+                    (range) heads)))]))
 
 (defn tbody
   ([data]
@@ -470,11 +480,10 @@
                                (remove #(nil? (second %))))
                            vattrs)]
        (for [row data]
-         (v [:tr]
-            (map #(if-let [attrs (idx-attrs %1)]
-                    [:td (mdl-attrs attrs :table) %2]
-                    [:td %2])
-                 (range) row)))))]))
+         (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
+                          [:td (mdl-attrs attrs :table) %2]
+                          [:td %2])
+                       (range) row)))))]))
 
 ;;; textfields
 
