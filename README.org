@@ -18,6 +18,12 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: require
 #+begin_src clojure
-  (require '[rum.core :as rum]
-           '[rum.mdl  :as mdl])
+  (require
+   '[rum.core :as rum]
+   '[rum.mdl  :as mdl])
 #+end_src
+
+** References
+
+- https://github.com/google/material-design-lite
+- https://github.com/google/material-design-lite/blob/master/src/mdlComponentHandler.js
