@@ -1,4 +1,5 @@
 /target
 /target-ghpage
 /scratch
+.cljs_rhino_repl
 figwheel_server.log

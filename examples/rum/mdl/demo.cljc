@@ -50,6 +50,34 @@
           ~(snippet-captions captions)]
          [:.source ~@sources]])))
 
+#?(:clj
+   (defmacro oneliner* [& xs]
+     (let [{:keys [sexps captions]}
+           (loop [xs xs, ret {}]
+             (let [sexp    (take-while (complement string?) xs)
+                   xs      (drop-while (complement string?) xs)
+                   caption (first xs)
+                   xs      (rest xs)
+                   ret     (-> ret
+                             (update :sexps (fnil conj []) sexp)
+                             (update :captions (fnil conj []) caption))]
+               (if (empty? xs)
+                 ret
+                 (recur xs ret))))
+           code (map #(if (< (count %) 2)
+                        (first %)
+                        (reduce conj [:div] %)) sexps)
+           sources (for [sexp sexps]
+                     (->> sexp
+                       (map pr-str)
+                       (string/join "\n")
+                       (syntaxify)))]
+       `[:.snippet
+         [:.header
+          ~(snippet-demos code)
+          ~(snippet-captions captions)]
+         [:.source ~@sources]])))
+
 (rum/defc section [& contents]
   (mdl/grid
    {:class ["demo" "example"]

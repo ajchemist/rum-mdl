@@ -11,10 +11,9 @@
                  [garden "1.3.2" :scope "test"]
                  [adzerk/bootlaces "0.1.13" :scope "test"]
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
-                 [adzerk/boot-reload "0.4.2" :scope "test"]
-                 [pandeiro/boot-http "0.7.0" :scope "test"]
-                 [jeluard/boot-notify "0.2.0" :scope "test"]
-
+                 [adzerk/boot-reload "0.4.7" :scope "test"]
+                 [pandeiro/boot-http "0.7.3" :scope "test"]
+                 [jeluard/boot-notify "0.2.1" :scope "test"]
                  [ajchemist/boot-figwheel "0.5.2-2" :scope "test"]
                  [org.clojure/tools.nrepl "0.2.12" :scope "test"]
                  [com.cemerick/piggieback "0.2.1"  :scope "test"]

@@ -34,11 +34,11 @@
    :switch      "MaterialSwitch"})
 
 (def mdl-required
-  {:button "mdl-button mdl-js-button"
-   :checkbox "mdl-checkbox mdl-js-checkbox"
-   :radio "mdl-radio mdl-js-radio"
-   :slider "mdl-slider mdl-js-slider"
-   :table "mdl-data-table mdl-js-data-table"
+  {:button    "mdl-button mdl-js-button"
+   :checkbox  "mdl-checkbox mdl-js-checkbox"
+   :radio     "mdl-radio mdl-js-radio"
+   :slider    "mdl-slider mdl-js-slider"
+   :table     "mdl-data-table mdl-js-data-table"
    :textfield "mdl-textfield mdl-js-textfield"})
 
 (def mdl-optional
@@ -87,7 +87,13 @@
    
    :textfield {:floating-label :mdl-textfield--floating-label
                :expandable     :mdl-textfield--expandable
-               :align-right    :mdl-textfield--align-right} 
+               :align-right    :mdl-textfield--align-right}
+
+   :tooltip {:large  :mdl-tooltip--large
+             :top    :mdl-tooltip--top
+             :left   :mdl-tooltip--left
+             :right  :mdl-tooltip--right
+             :bottom :mdl-tooltip--bottom}
 
    nil {:ripple :mdl-js-ripple-effect}})
 
@@ -179,15 +185,25 @@
                  (update e 1 mdl-attrs (:rum-mdl attrs))
                  e)))])))
 
-(defn listen-component-upgraded
-  {:style/indent 1}
-  [el callback]
-  (.addEventListener el "mdl-componentupgraded" callback))
+#?(:cljs
+   (defn upgrade-element [el]
+     (js/componentHandler.upgradeElement el)))
 
-(defn listen-component-downgraded
-  {:style/indent 1}
-  [el callback]
-  (.addEventListener el "mdl-componentdowngraded" callback))
+#?(:cljs
+   (defn downgrade-elements [& elements]
+     (js/componentHandler.downgradeElements (to-array elements))))
+
+#?(:cljs
+   (defn listen-component-upgraded
+     {:style/indent 1}
+     [el callback]
+     (.addEventListener el "mdl-componentupgraded" callback)))
+
+#?(:cljs
+   (defn listen-component-downgraded
+     {:style/indent 1}
+     [el callback]
+     (.addEventListener el "mdl-componentdowngraded" callback)))
 
 (def component-handler
   "only for `mdl-js-*' classed component"
@@ -196,7 +212,7 @@
      #?(:cljs
         (let [rc  (:rum/react-component state)
               dom (js/ReactDOM.findDOMNode rc)]
-          (js/componentHandler.upgradeElement dom)
+          (upgrade-element dom)
           (assoc state :mdl/dom dom))
         :clj state))
    :will-unmount
@@ -204,13 +220,14 @@
      #?(:cljs
         (let [rc  (:rum/react-component state)
               dom (js/ReactDOM.findDOMNode rc)]
-          (js/componentHandler.downgradeElements #js[ dom ])
+          (downgrade-elements dom)
           (dissoc state :mdl/dom))
         :clj state))})
 
 (defn icon
   ([font] (icon nil font))
-  ([attrs font] [:i.material-icons attrs font]))
+  ([attrs font] [:i.material-icons attrs font])
+  ([tag attrs font] [tag (update attrs :class classname :material-icons) font]))
 
 ;;; badges
 
@@ -268,6 +285,7 @@
   [:.mdl-layout.mdl-js-layout attrs contents])
 
 (defn layout-spacer [] [:.mdl-layout-spacer])
+
 (defn layout-title [title] [:.mdl-layout-title title])
 
 (defc header < (rum-mdl :header) rum/static
@@ -276,7 +294,6 @@
    [:.mdl-layout__header-row contents]])
 
 (defc nav < (rum-mdl :nav) rum/static
-  "<nav>"
   [& [attrs contents]]
   [:nav.mdl-navigation attrs contents])
 
@@ -358,10 +375,9 @@
           (when (some #{:ripple} mdl)
             (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
                   ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
-              (js/componentHandler.upgradeElement ripple)
+              (upgrade-element ripple)
               (listen-component-downgraded dom
-                #(js/componentHandler.downgradeElements
-                  #js [ ripple ]))))
+                #(downgrade-elements ripple))))
           (assoc state :mdl/component m))
         :clj state))
    :will-unmount
@@ -418,11 +434,10 @@
    (thead nil heads))
   ([vattrs heads]
    [:thead
-    (let [idx-attrs
-          (into {} (comp
-                    (map-indexed #(vector %1 %2))
-                    (remove #(nil? (second %))))
-                vattrs)]
+    (let [idx-attrs (into {} (comp
+                              (map-indexed #(vector %1 %2))
+                              (remove #(nil? (second %))))
+                          vattrs)]
       (v [:tr]
          (map #(if-let [attrs (idx-attrs %1)]
                  [:th (mdl-attrs attrs :table) %2]
@@ -435,11 +450,10 @@
   ([vattrs data]
    [:tbody
     (contents-with-key
-     (let [idx-attrs
-           (into {} (comp
-                     (map-indexed #(vector %1 %2))
-                     (remove #(nil? (second %))))
-                 vattrs)]
+     (let [idx-attrs (into {} (comp
+                               (map-indexed #(vector %1 %2))
+                               (remove #(nil? (second %))))
+                           vattrs)]
        (for [row data]
          (v [:tr]
             (map #(if-let [attrs (idx-attrs %1)]
@@ -469,6 +483,10 @@
   (v [:.mdl-textfield__expandable-holder attrs] contents))
 
 ;;; tooltips
+
+(defc tooltip < (rum-mdl :tooltip) component-handler rum/static
+  [& [attrs content]]
+  [:.mdl-tooltip attrs content])
 
 (comment
 
