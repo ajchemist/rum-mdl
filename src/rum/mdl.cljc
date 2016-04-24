@@ -7,9 +7,28 @@
    #?(:cljs
       [cljsjs.material])))
 
+(def mdl-component
+  {:button      "MaterialButton"
+   :table       "MaterialDataTable"
+   :layout      "MaterialLayout"
+   :layout-tab  "MaterialLayoutTab"
+   :menu        "MaterialMenu"
+   :progress    "MaterialProgress"
+   :ripple      "MaterialRipple"
+   :snackbar    "MaterialSnackbar"
+   :spinner     "MaterialSpinner"
+   :tabs        "MaterialTabs"
+   :textfield   "MaterialTextfield"
+   :tooltip     "MaterialTooltip"
+   :checkbox    "MaterialCheckbox"
+   :raido       "MaterialRadio"
+   :icon-toggle "MaterialIconToggle"
+   :switch      "MaterialSwitch"})
+
 (def mdl-required
   {:button "mdl-button mdl-js-button"
    :checkbox "mdl-checkbox mdl-js-checkbox"
+   :radio "mdl-radio mdl-js-radio"
    :slider "mdl-slider mdl-js-slider"
    :table "mdl-data-table mdl-js-data-table"
    :textfield "mdl-textfield mdl-js-textfield"})
@@ -31,7 +50,7 @@
 
    :card   {:border :mdl-card--border}
 
-   :checkbox {:ripple :mdl-js-ripple-effect}
+   :toggle {:ripple :mdl-js-ripple-effect}
 
    :layout {:fixed-tabs               :mdl-layout--fixed-tabs
             :fixed-drawer             :mdl-layout--fixed-drawer
@@ -41,31 +60,7 @@
 
    :grid {:no-spacing :mdl-grid--no-spacing}
 
-   :cell (apply
-          hash-map
-          :stretch      :mdl-cell--stretch
-          :top          :mdl-cell--top
-          :middle       :mdl-cell--middle
-          :bottom       :mdl-cell--bottom
-          :hide-desktop :mdl-cell--hide-desktop
-          :hide-tablet  :mdl-cell--hide-tablet
-          :hide-phone   :mdl-cell--hide-phone
-          (reduce
-           conj
-           (flatten
-            (for [[x y] [["" 12] ["-desktop" 12] ["-tablet" 8] ["-phone" 4]]]
-              (reduce
-               conj
-               (for [z (map str (range 1 (inc y)))]
-                 [(keyword (str z x)) (keyword (str "mdl-cell--" z "-col" x))])
-               (for [z (map #(str % "-offset") (range 1 y))
-                     :let [z (str z x)]]
-                 [(keyword z) (keyword (str "mdl-cell--" z))]))))
-           (flatten
-            (for [x (range 1 13) :let [x (str "order-" x)]]
-              (for [y ["" "-desktop" "-tablet" "-phone"]
-                    :let [y (str x y)]]
-                [(keyword y) (keyword (str "mdl-cell--" y))])))))
+   :cell {:stretch :mdl-cell--stretch, :top :mdl-cell--top, :middle :mdl-cell--middle, :bottom :mdl-cell--bottom, :hide-desktop :mdl-cell--hide-desktop, :hide-tablet :mdl-cell--hide-tablet, :hide-phone :mdl-cell--hide-phone, :mdl-cell--order-12-phone :order-12-phone, :mdl-cell--order-12-tablet :order-12-tablet, :mdl-cell--order-12-desktop :order-12-desktop, :mdl-cell--order-12 :order-12, :mdl-cell--order-11-phone :order-11-phone, :mdl-cell--order-11-tablet :order-11-tablet, :mdl-cell--order-11-desktop :order-11-desktop, :mdl-cell--order-11 :order-11, :mdl-cell--order-10-phone :order-10-phone, :mdl-cell--order-10-tablet :order-10-tablet, :mdl-cell--order-10-desktop :order-10-desktop, :mdl-cell--order-10 :order-10, :mdl-cell--order-9-phone :order-9-phone, :mdl-cell--order-9-tablet :order-9-tablet, :mdl-cell--order-9-desktop :order-9-desktop, :mdl-cell--order-9 :order-9, :mdl-cell--order-8-phone :order-8-phone, :mdl-cell--order-8-tablet :order-8-tablet, :mdl-cell--order-8-desktop :order-8-desktop, :mdl-cell--order-8 :order-8, :mdl-cell--order-7-phone :order-7-phone, :mdl-cell--order-7-tablet :order-7-tablet, :mdl-cell--order-7-desktop :order-7-desktop, :mdl-cell--order-7 :order-7, :mdl-cell--order-6-phone :order-6-phone, :mdl-cell--order-6-tablet :order-6-tablet, :mdl-cell--order-6-desktop :order-6-desktop, :mdl-cell--order-6 :order-6, :mdl-cell--order-5-phone :order-5-phone, :mdl-cell--order-5-tablet :order-5-tablet, :mdl-cell--order-5-desktop :order-5-desktop, :mdl-cell--order-5 :order-5, :mdl-cell--order-4-phone :order-4-phone, :mdl-cell--order-4-tablet :order-4-tablet, :mdl-cell--order-4-desktop :order-4-desktop, :mdl-cell--order-4 :order-4, :mdl-cell--order-3-phone :order-3-phone, :mdl-cell--order-3-tablet :order-3-tablet, :mdl-cell--order-3-desktop :order-3-desktop, :mdl-cell--order-3 :order-3, :mdl-cell--order-2-phone :order-2-phone, :mdl-cell--order-2-tablet :order-2-tablet, :mdl-cell--order-2-desktop :order-2-desktop, :mdl-cell--order-2 :order-2, :mdl-cell--order-1-phone :order-1-phone, :mdl-cell--order-1-tablet :order-1-tablet, :mdl-cell--order-1-desktop :order-1-desktop, :mdl-cell--order-1 :order-1, :11-offset :mdl-cell--11-offset, :10-offset :mdl-cell--10-offset, :9-offset :mdl-cell--9-offset, :8-offset :mdl-cell--8-offset, :7-offset :mdl-cell--7-offset, :6-offset :mdl-cell--6-offset, :5-offset :mdl-cell--5-offset, :4-offset :mdl-cell--4-offset, :3-offset :mdl-cell--3-offset, :2-offset :mdl-cell--2-offset, :1-offset :mdl-cell--1-offset, :1 :mdl-cell--1-col, :2 :mdl-cell--2-col, :3 :mdl-cell--3-col, :4 :mdl-cell--4-col, :5 :mdl-cell--5-col, :6 :mdl-cell--6-col, :7 :mdl-cell--7-col, :8 :mdl-cell--8-col, :9 :mdl-cell--9-col, :10 :mdl-cell--10-col, :11 :mdl-cell--11-col, :12 :mdl-cell--12-col, :11-offset-desktop :mdl-cell--11-offset-desktop, :10-offset-desktop :mdl-cell--10-offset-desktop, :9-offset-desktop :mdl-cell--9-offset-desktop, :8-offset-desktop :mdl-cell--8-offset-desktop, :7-offset-desktop :mdl-cell--7-offset-desktop, :6-offset-desktop :mdl-cell--6-offset-desktop, :5-offset-desktop :mdl-cell--5-offset-desktop, :4-offset-desktop :mdl-cell--4-offset-desktop, :3-offset-desktop :mdl-cell--3-offset-desktop, :2-offset-desktop :mdl-cell--2-offset-desktop, :1-offset-desktop :mdl-cell--1-offset-desktop, :1-desktop :mdl-cell--1-col-desktop, :2-desktop :mdl-cell--2-col-desktop, :3-desktop :mdl-cell--3-col-desktop, :4-desktop :mdl-cell--4-col-desktop, :5-desktop :mdl-cell--5-col-desktop, :6-desktop :mdl-cell--6-col-desktop, :7-desktop :mdl-cell--7-col-desktop, :8-desktop :mdl-cell--8-col-desktop, :9-desktop :mdl-cell--9-col-desktop, :10-desktop :mdl-cell--10-col-desktop, :11-desktop :mdl-cell--11-col-desktop, :12-desktop :mdl-cell--12-col-desktop, :7-offset-tablet :mdl-cell--7-offset-tablet, :6-offset-tablet :mdl-cell--6-offset-tablet, :5-offset-tablet :mdl-cell--5-offset-tablet, :4-offset-tablet :mdl-cell--4-offset-tablet, :3-offset-tablet :mdl-cell--3-offset-tablet, :2-offset-tablet :mdl-cell--2-offset-tablet, :1-offset-tablet :mdl-cell--1-offset-tablet, :1-tablet :mdl-cell--1-col-tablet, :2-tablet :mdl-cell--2-col-tablet, :3-tablet :mdl-cell--3-col-tablet, :4-tablet :mdl-cell--4-col-tablet, :5-tablet :mdl-cell--5-col-tablet, :6-tablet :mdl-cell--6-col-tablet, :7-tablet :mdl-cell--7-col-tablet, :8-tablet :mdl-cell--8-col-tablet, :3-offset-phone :mdl-cell--3-offset-phone, :2-offset-phone :mdl-cell--2-offset-phone, :1-offset-phone :mdl-cell--1-offset-phone, :1-phone :mdl-cell--1-col-phone, :2-phone :mdl-cell--2-col-phone, :3-phone :mdl-cell--3-col-phone, :4-phone :mdl-cell--4-col-phone}
 
    :progress {:indeterminate :mdl-progress__indeterminate}
    
@@ -188,19 +183,20 @@
   "only for `mdl-js-*' classed component"
   {:did-mount
    (fn [state]
-     (let [comp (:rum/react-component state)]
-       #?(:cljs
-          (-> comp
-            (js/ReactDOM.findDOMNode)
-            (js/componentHandler.upgradeElement))))
-     state)
+     #?(:cljs
+        (let [rc  (:rum/react-component state)
+              dom (js/ReactDOM.findDOMNode rc)]
+          (js/componentHandler.upgradeElement dom)
+          (assoc state :mdl/dom dom))
+        :clj state))
    :will-unmount
    (fn [state]
-     (let [comp (:rum/react-component state)]
-       #?(:cljs
-          (js/componentHandler.downgradeElements
-           #js[ (js/ReactDOM.findDOMNode comp) ])))
-     state)})
+     #?(:cljs
+        (let [rc  (:rum/react-component state)
+              dom (js/ReactDOM.findDOMNode rc)]
+          (js/componentHandler.downgradeElements #js[ dom ])
+          (dissoc state :mdl/dom))
+        :clj state))})
 
 (defn icon
   ([font] (icon nil font))
@@ -334,15 +330,74 @@
 
 ;;; toggles
 
-(defc checkbox < (rum-mdl :checkbox) component-handler rum/static
-  [& [attrs contents]]
-  [:label.mdl-checkbox.mdl-js-checkbox attrs contents])
+(defn toggle
+  "workaround mixin"
+  [component]
+  {:did-mount
+   (fn [state]
+     #?(:cljs
+        (let [{[{:keys [checked disabled mdl]}] :rum/args
+               dom :mdl/dom} state
+              m (aget dom component)]
+          (when disabled                ; (. m (enable))
+            (. m (disable)))
+          (case component
+            "MaterialSwitch"
+            (when checked               ; (. m (off))
+              (. m (on)))
+            (when checked               ; (. m (uncheck))
+              (. m (check))))
+          (when (some #{:ripple} mdl)
+            (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
+                  ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
+              (js/componentHandler.upgradeElement ripple)
+              (.addEventListener dom "mdl-componentdowngraded"
+                                 #(js/componentHandler.downgradeElements
+                                   #js [ ripple ]))))
+          (assoc state :mdl/component m))
+        :clj state))
+   :will-unmount
+   (fn [state]
+     #?(:cljs
+        (dissoc state :mdl/component)
+        :clj
+        state))})
 
-(defmdl checkbox-input :checkbox [attrs [content]]
-  [:input.mdl-checkbox__input (merge {:type "checkbox"} attrs) content])
+(defc checkbox < component-handler (toggle "MaterialCheckbox") 
+  [{:keys [input label] :as attrs}]
+  [:label.mdl-checkbox.mdl-js-checkbox
+   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   [:input.mdl-checkbox__input
+    (-> {:type "checkbox"}
+      (merge input))]
+   [:span.mdl-checkbox__label label]])
 
-(defmdl checkbox-label :checkbox [attrs [content]]
-  [:span.mdl-checkbox__label attrs content])
+(defc radio < component-handler (toggle "MaterialRadio") rum/static
+  [{:keys [input label] :as attrs}]
+  [:label.mdl-radio.mdl-js-radio
+   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   [:input.mdl-radio__button
+    (-> {:type "radio"}
+      (merge input))]
+   [:span.mdl-radio__label label]])
+
+(defc icon-toggle < component-handler (toggle "MaterialIconToggle") rum/static
+  [{:keys [input label] :as attrs}]
+  [:label.mdl-icon-toggle.mdl-js-icon-toggle
+   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   [:input.mdl-icon-toggle__input
+    (-> {:type "checkbox"}
+      (merge input))]
+   [:i.material-icons.mdl-icon-toggle__label label]])
+
+(defc switch < component-handler (toggle "MaterialSwitch") rum/static
+  [{:keys [input] :as attrs}]
+  [:label.mdl-switch.mdl-js-switch
+   (-> attrs (mdl-attrs :toggle) (dissoc :input))
+   [:input.mdl-switch__input
+    (-> {:type "checkbox"}
+      (merge input))]
+   [:span.mdl-switch__label]])
 
 ;;; tables
 
