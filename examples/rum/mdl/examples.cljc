@@ -22,32 +22,29 @@
 #?(:cljs
    (defn el [id] (js/document.getElementById id)))
 
-(defn- v [val xs] (reduce conj val xs))
-
-(defn link [ctor image-url & xs]
-  (v
-   [:a {:on-click
-        (fn [_] #?(:cljs (rum/mount (ctor) (el "mount"))))}
-    [:.link-image
-     {:style {:background-image (str "url(" image-url ")")}}]]
-   xs))
+(defn link [ctor image-path label]
+  [:a {:on-click
+       (fn [_] #?(:cljs (rum/mount (ctor) (el "mount"))))}
+   [:.link-image
+    {:style {:background-image (str "url(https://getmdl.io" image-path ")")}}]
+   [:.label label]])
 
 (rum/defc aside-components-nav []
   [:aside.components-nav
-   (link #'rum.mdl.examples.badges/examples "https://getmdl.io/assets/comp_badges.png" "Badges")
-   (link #'rum.mdl.examples.buttons/examples "https://getmdl.io/assets/comp_buttons.png" "Buttons")
-   (link #'rum.mdl.examples.cards/examples "https://getmdl.io/assets/comp_cards.png" "Cards")
-   (link #'rum.mdl.examples.dialogs/examples "https://getmdl.io/assets/comp_dialog.png" "Dialogs")
-   (link #'rum.mdl.examples.layout/examples "https://getmdl.io/assets/comp_layout.png" "Layout")
-   (link #'rum.mdl.examples.lists/examples "https://getmdl.io/assets/comp_lists.png" "Lists")
-   (link #'rum.mdl.examples.loading/examples "https://getmdl.io/assets/comp_loading.png" "Loading")
-   (link #'rum.mdl.examples.menus/examples "https://getmdl.io/assets/comp_menus.png" "Menus")
-   (link #'rum.mdl.examples.sliders/examples "https://getmdl.io/assets/comp_sliders.png" "Sliders")
-   (link #'rum.mdl.examples.snackbar/examples "https://getmdl.io/assets/comp_snackbar.png" "Snackbar")
-   (link #'rum.mdl.examples.toggles/examples "https://getmdl.io/assets/comp_toggles.png" "Toggles")
-   (link #'rum.mdl.examples.tables/examples "https://getmdl.io/assets/comp_tables.png" "Tables")
-   (link #'rum.mdl.examples.textfields/examples "https://getmdl.io/assets/comp_textfields.png" "Text Fields")
-   (link #'rum.mdl.examples.tooltips/examples "https://getmdl.io/assets/comp_tooltips.png" "Tooltips")])
+   (link #'rum.mdl.examples.badges/examples     "/assets/comp_badges.png"     "Badges")
+   (link #'rum.mdl.examples.buttons/examples    "/assets/comp_buttons.png"    "Buttons")
+   (link #'rum.mdl.examples.cards/examples      "/assets/comp_cards.png"      "Cards")
+   (link #'rum.mdl.examples.dialogs/examples    "/assets/comp_dialog.png"     "Dialogs")
+   (link #'rum.mdl.examples.layout/examples     "/assets/comp_layout.png"     "Layout")
+   (link #'rum.mdl.examples.lists/examples      "/assets/comp_lists.png"      "Lists")
+   (link #'rum.mdl.examples.loading/examples    "/assets/comp_loading.png"    "Loading")
+   (link #'rum.mdl.examples.menus/examples      "/assets/comp_menus.png"      "Menus")
+   (link #'rum.mdl.examples.sliders/examples    "/assets/comp_sliders.png"    "Sliders")
+   (link #'rum.mdl.examples.snackbar/examples   "/assets/comp_snackbar.png"   "Snackbar")
+   (link #'rum.mdl.examples.toggles/examples    "/assets/comp_toggles.png"    "Toggles")
+   (link #'rum.mdl.examples.tables/examples     "/assets/comp_tables.png"     "Tables")
+   (link #'rum.mdl.examples.textfields/examples "/assets/comp_textfields.png" "Text Fields")
+   (link #'rum.mdl.examples.tooltips/examples   "/assets/comp_tooltips.png"   "Tooltips")])
 
 (rum/defc content []
   [:#content.mdl-grid.mdl-grid--no-spacing
