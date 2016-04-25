@@ -30,6 +30,8 @@ As you are using [[boot]], then you can retrieve the css file with =sift= task.
 
 #+NAME: asset
 #+begin_src clojure
+  ;; first, add [cljsjs/material "x.y.z-w"] into :dependencies
+
   (sift :add-jar {'cljsjs/material #".*.css$"})
   (sift :move {#".*/material.inc.css"     "material.inc.css"
                #".*/material.min.inc.css" "material.min.inc.css"})
