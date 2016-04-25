@@ -29,6 +29,8 @@
     [0 :2px :4px  :-1px "rgba(0,0,0,.2)"]]})
 
 (defstylesfn layout []
+  [:a.mdl-navigation__link
+   {:cursor "pointer"}]
   [:.mdl-navigation__link
    [:.material-icons
     {:margin {:right "0.649ex"}}]]
@@ -76,15 +78,18 @@
   [:#mount
    {:display "inline-block"
     :flex-grow "1"
-    :padding-bottom "120px"}
+    :padding-bottom "120px"
+    :background-color "#fafafa"}
    [:section
-    {:display "block"
-     :min-height "800px"}]])
+    {:display "block"}]])
 
 (defstylesfn demo []
-  [:.demo
+  [:.demo.example
    {:display "block"
-    :background-color "#fafafa"}
+    :position "relative"
+    :box-sizing "border-box"
+    :padding-top "64px"
+    :min-height "800px"}
    [:.intro
     {:margin [["30px" 0 "60px" "32px"]]}
     [:h3
@@ -111,13 +116,24 @@
                :background " #f5f2f0"
                :padding {:top "1em" :bottom "1em"}}
      [:pre {:margin {:left "45px" :right "45px"}}]]]]
-  [:.demo
+  [:.demo.example
    [:.mdl-textfield--expandable {:width "150px"}]
    [:.mdl-slider {:width "30vw" :max-width "260px"}]
    [:.mdl-snackbar
     [" ~ "
      [:button {:width "175px"}]]]
-   [:.mdl-list {:width "25vw" :min-width "260px"}]])
+   [:.mdl-list {:width "30vw" :min-width "260px"}]
+   [:.mdl-components-img
+    {:position "absolute"
+     :margin-top "24px"
+     :left "40px"
+     :height "90%"
+     :width "90%"
+     :max-height "600px"
+     :background [["url('https://getmdl.io/assets/compindex_2x.png')"
+                   "no-repeat"
+                   "top"
+                   "left/contain"]]}]])
 
 (defstylesheetfn css []
   (layout)

@@ -15,7 +15,8 @@
    [rum.mdl.examples.toggles]
    [rum.mdl.examples.tables]
    [rum.mdl.examples.textfields]
-   [rum.mdl.examples.tooltips]))
+   [rum.mdl.examples.tooltips]
+   [rum.mdl.demo :as demo]))
 
 #?(:cljs (enable-console-print!))
 
@@ -46,11 +47,17 @@
    (link #'rum.mdl.examples.textfields/examples "/assets/comp_textfields.png" "Text Fields")
    (link #'rum.mdl.examples.tooltips/examples   "/assets/comp_tooltips.png"   "Tooltips")])
 
+(rum/defc front []
+  (demo/section [:.mdl-components-img]))
+
 (rum/defc content []
-  [:#content.mdl-grid.mdl-grid--no-spacing
-   [:.mdl-cell.mdl-cell--12-col
+  (mdl/grid
+   {:mdl [:no-spacing]
+    :id  "content"}
+   (mdl/cell
+    {:mdl [:12]}
     (aside-components-nav)
-    [:#mount]]])
+    [:#mount (front)])))
 
 (rum/defc chrome []
   (mdl/layout
@@ -58,7 +65,7 @@
     (mdl/layout-title "〈RUM〉-MDL")
     (mdl/layout-spacer)
     (mdl/nav
-     (mdl/link {:on-click identity} "Components")
+     (mdl/link {:on-click (fn [_] #?(:cljs (rum/mount (#'front) (el "mount"))))} "Components")
      (mdl/link {:href "http://github.com/aJchemist/rum-mdl"} (mdl/icon "link") "GitHub")))
    (mdl/main-content {:id "main"} (content))))
 
@@ -69,7 +76,6 @@
      (rum/mount (chrome) (el "examples"))))
 
 (comment
-  #?(:cljs
-     (rum/mount (rum.mdl.examples.buttons/examples)
-                (el "mount")))
+  #?(:cljs (rum/mount (rum.mdl.examples.buttons/examples)
+                      (el "mount")))
   )

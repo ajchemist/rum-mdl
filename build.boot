@@ -103,7 +103,8 @@
           (cssfn)))
       (-> fileset (add-asset tmp) commit!))))
 
-(deftask ^:private examples-asset []
+(deftask ^:private examples-asset
+  [d dev bool]
   (require '[rum.core :as rum] '[rum.mdl.examples :as examples])
   (comp
    (index-html
@@ -114,7 +115,8 @@
              [:link {:rel "stylesheet" :href "rum-mdl-examples.css"}]]
     :body   [[:div#examples ((r rum/render-html) ((r examples/chrome)))]]
     :script [[:script {:src "rum-mdl-examples.js"}]
-             [:script "window.onload=rum.mdl.examples.onload;"]])
+             [:script "window.onload=rum.mdl.examples.onload;"]
+             (when-not dev [:script {:src "ga.js"}])])
    (sift :add-jar {'cljsjs/material #".*.css$"})
    (sift :move {#".*/material.min.inc.css" "material.min.inc.css"})
    (sift :invert true :include #{#"cljsjs"})
@@ -126,7 +128,7 @@
            '[pandeiro.boot-http :refer [serve]])
   (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
   (comp 
-   (examples-asset)
+   (examples-asset :dev true)
    ((r figwheel)
     :all-builds [{:id "dev"
                   :compiler (->> {:main 'rum.mdl.examples
