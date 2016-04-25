@@ -5,6 +5,7 @@
 #+LINK: rum   https://github.com/tonsky/rum
 #+LINK: react https://facebook.github.io/react/
 #+LINK: mdl   https://getmdl.io
+#+LINK: boot  https://boot-clj.com
 
 Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
@@ -21,6 +22,23 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
   (require
    '[rum.core :as rum]
    '[rum.mdl  :as mdl])
+#+end_src
+
+Default mdl stylesheet is required for proper site rendering.
+
+As you are using [[boot]], then you can retrieve the css file with =sift= task.
+
+#+NAME: asset
+#+begin_src clojure
+  (sift :add-jar {'cljsjs/material #".*.css$"})
+  (sift :move {#".*/material.inc.css"     "material.inc.css"
+               #".*/material.min.inc.css" "material.min.inc.css"})
+#+end_src
+
+and add a =<link>= tag in your =index.html=.
+
+#+begin_src clojure
+  [:link {:rel "stylesheet" :href "material.inc.css"}]
 #+end_src
 
 ** References

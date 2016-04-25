@@ -193,23 +193,6 @@
                 ~a-binding (mdl-attrs ~a-binding ~mdl-key)]
             ~@body)))))
 
-#?(:clj
-   (defmacro mdl
-     {:style/indent [1]
-      :arglists '([tag? attrs? & contents])}
-     [& xs]
-     (let [[tag]    (take-while keyword? xs)
-           tag      (if tag tag :div)
-           xs       (drop-while keyword? xs)
-           attrs    (reduce merge (take-while map? xs))
-           contents (drop-while (complement sequential?) xs)]
-       `[~tag ~(-> attrs (rum-mdl-attrs) (mdl-attrs (:rum-mdl attrs)))
-         ~@(for [e contents]
-             (let [[_ attrs] e]
-               (if (map? attrs)
-                 (update e 1 mdl-attrs (:rum-mdl attrs))
-                 e)))])))
-
 #?(:cljs
    (defn upgrade-element [el]
      (js/componentHandler.upgradeElement el)))

@@ -161,3 +161,6 @@
 (deftask package []
   (set-env! :resource-paths #{"src"})
   (build-jar))
+
+;;; boot -P package push-snapshot
+;;; boot -P -d rum-mdl: show -d
