@@ -39,8 +39,7 @@
        (mdl/textfield-label {:for "sample5"} "Text lines..."))
       (mdl/textfield
        {:mdl [:expandable]}
-       (mdl/mdl :label {:mdl [:icon] :rum-mdl :button :for "sample6"}
-                (mdl/icon "search"))
+       (mdl/label-button {:mdl [:icon] :for "sample6"} (mdl/icon "search"))
        (mdl/textfield-expandable-holder
         (mdl/textfield-input {:type "text" :id "sample6"})
         (mdl/textfield-label {:for "sample-expandable"} "Expandable Input")))]
