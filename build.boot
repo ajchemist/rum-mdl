@@ -2,8 +2,7 @@
  :source-paths #{"src" "examples"}
  :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [rum "0.8.2" :scope "provided" :exclusions [sablono]]
-                 [sablono "0.7.1"]
+                 [rum "0.8.3" :scope "provided"]
 
                  [ajchemist/classname "0.2.1"]
                  [cljsjs/material "1.1.3-1"]

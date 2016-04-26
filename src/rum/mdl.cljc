@@ -161,7 +161,7 @@
                       contents)]
        (assoc new
          :rum/args [attrs contents]
-         :mdl/type type)))
+         :mdl/type typekey)))
    :will-mount
    (fn [{args :rum/args :as state}]
      ;; core/type of rum/args is cljs.core/IndexedSeq
@@ -174,7 +174,7 @@
        #_(println (map core/type contents))
        (assoc state
          :rum/args [attrs contents]
-         :mdl/type type)))})
+         :mdl/type typekey)))})
 
 #?(:clj
    (defmacro defmdlc
