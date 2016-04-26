@@ -1,7 +1,8 @@
 (ns rum.mdl
   (:refer-clojure :exclude [list])
-  #?(:cljs (:require-macros [rum.mdl :refer [defmdl]]))
+  #?(:cljs (:require-macros [rum.mdl :refer [defmdlc]]))
   (:require
+   [#?(:clj clojure.core :cljs cljs.core) :as core]
    [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
                          :cljs [:refer-macros [defc defcc defcs]])]
    [classname.core :refer [classname]]
@@ -10,8 +11,6 @@
       :cljs
       [cljsjs.material])))
 
-(defn- v [val xs] (reduce conj val xs))
-
 (defn- rename-kw [ks kmap]
   (for [k ks]
     (if-let [new (kmap k)]
@@ -19,6 +18,7 @@
       (str "mdl-" (name k)))))
 
 (def mdl-component
+  "<typekey, component-name>"
   {:button      "MaterialButton"
    :table       "MaterialDataTable"
    :layout      "MaterialLayout"
@@ -37,6 +37,7 @@
    :switch      "MaterialSwitch"})
 
 (def mdl-required
+  "<typekey, required-classname-map>"
   {:button    "mdl-button mdl-js-button"
    :checkbox  "mdl-checkbox mdl-js-checkbox"
    :radio     "mdl-radio mdl-js-radio"
@@ -45,6 +46,7 @@
    :textfield "mdl-textfield mdl-js-textfield"})
 
 (def mdl-optional
+  "<typekey, optional-classname-map>"
   {:badge {:no-background :mdl-badge--no-background
            :overlap       :mdl-badge--overlap
            ;; custom
@@ -126,17 +128,18 @@
     [attrs contents]))
 
 (defn- contents-with-key [contents & [key]]
-  (if (< (count contents) 2)
-    (first contents)
-    (for [e contents :let [key (gensym key)]]
-      (cond
-        (vector? e)
-        (if (map? (get e 1))
-          (assoc-in e [1 :key] key)
-          (apply vector (first e) {:key key} (rest e)))
-        (string? e)
-        [:span {:key key} e]
-        :else (rum/with-key e key)))))
+  (for [e contents :let [key (gensym key)]]
+    (cond
+      (vector? e)
+      (if (map? (get e 1))
+        (assoc-in e [1 :key] key)
+        (apply vector (first e) {:key key} (rest e)))
+      (string? e)
+      [:span {:key key} e]
+      :else (rum/with-key e key))))
+
+(defn mdl-dom [this]
+  #?(:cljs (:mdl/dom @(rum/state this))))
 
 (defn mdl-attrs
   ([attrs]
@@ -148,57 +151,51 @@
        (update :class classname (rename-kw mdl (mdl-optional key)))
        (dissoc :mdl)))))
 
-(defn rum-mdl-attrs
-  [{:keys [rum-mdl] :as attrs}]
-  (if rum-mdl
-    (-> attrs
-      (update :class classname (mdl-required rum-mdl))
-      (dissoc :rum-mdl))
-    attrs))
-
-(defn rum-mdl [key]
+(defn mdl-type [typekey contents?]
   {:transfer-state
    (fn [_ {args :rum/args :as new}]
      (let [[attrs contents] (attrs-contents args)
-           attrs    (mdl-attrs attrs key)
-           contents (contents-with-key contents key)]
-       (assoc new :rum/args [attrs contents])))
+           attrs    (mdl-attrs attrs typekey)
+           contents (if contents?
+                      (contents-with-key contents typekey)
+                      contents)]
+       (assoc new
+         :rum/args [attrs contents]
+         :mdl/type type)))
    :will-mount
    (fn [{args :rum/args :as state}]
-     ;; type of rum/args is cljs.core/IndexedSeq
+     ;; core/type of rum/args is cljs.core/IndexedSeq
      ;; args: [attr? content*]
      (let [[attrs contents] (attrs-contents args)
-           attrs    (mdl-attrs attrs key)
-           contents (contents-with-key contents key)]
-       #_(println (map type contents))
-       (assoc state :rum/args [attrs contents])))})
+           attrs    (mdl-attrs attrs typekey)
+           contents (if contents?
+                      (contents-with-key contents typekey)
+                      contents)]
+       #_(println (map core/type contents))
+       (assoc state
+         :rum/args [attrs contents]
+         :mdl/type type)))})
 
 #?(:clj
-   (defmacro defmdl
-     {:arglists '([name mdl-key? docstring? binding & body])}
+   (defmacro defmdlc
+     "binding must be a vector literal"
+     {:arglists '([name mdl-type? docstring? mixin* binding & body])}
      [& xs]
-     (let [arglists  '([& contents] [attrs & contents])
+     (let [arglists  '([attrs? contents*])
            [name]    xs
            xs        (rest xs)
            ys        (take-while (complement vector?) xs)
-           mdl-key   (first (filter keyword? ys))
+           typekey   (first (filter keyword? ys))
            docstring (first (filter string? ys))
            docstring (if docstring docstring "")
+           mixin     (remove #(or (keyword? %) (string? %)) ys)
            xs        (drop-while (complement vector?) xs)
            binding   (first xs)
-           a-binding (first binding)
-           body      (rest xs)
-           ;; xs        (rest xs)
-           ;; body      (butlast xs)
-           ;; last-form (last xs)
-           ;; cljs?     (:ns &env)
-           ]
-       `(defn ~name ~docstring
-          {:arglists '~arglists}
-          [& xs#]
-          (let [~binding   (attrs-contents xs#)
-                ~a-binding (mdl-attrs ~a-binding ~mdl-key)]
-            ~@body)))))
+           contents? (some (complement nil?) (map meta binding))
+           body      (rest xs)]
+       `(defc ~(with-meta name `{:arglists '~arglists})
+          ~'< (mdl-type ~typekey ~contents?) ~@mixin
+          ~binding ~@body))))
 
 #?(:cljs
    (defn upgrade-element [el]
@@ -243,35 +240,25 @@
 
 ;;; badges
 
-(defn badge-attrs [attrs]
-  (-> attrs
-    (rum-mdl-attrs)
-    (mdl-attrs :badge)))
-
-(defc badge < (rum-mdl :badge) rum/static
-  [& [attrs content]]
+(defmdlc badge :badge rum/static
+  [attrs [content]]
   [:span.mdl-badge ^:attrs attrs content])
 
 ;;; buttons
 
-(defn button-attrs [attrs]
-  (-> attrs
-    (rum-mdl-attrs)
-    (mdl-attrs :button)))
-
-(defc button < (rum-mdl :button) component-handler rum/static
-  [& [attrs content]]
+(defmdlc button :button component-handler rum/static
+  [attrs [content]]
   [:button.mdl-button.mdl-js-button ^:attrs attrs content])
 
-(defc label-button < (rum-mdl :button) component-handler rum/static
-  [& [attrs content]]
+(defmdlc label-button :button component-handler rum/static
+  [attrs [content]]
   [:label.mdl-button.mdl-js-button ^:attrs attrs content])
 
 ;;; cards
 
-(defc card < (rum-mdl :card) rum/static
-  [& [attrs content]]
-  [:.mdl-card ^:attrs attrs content])
+(defmdlc card :card rum/static
+  [attrs ^:contents contents]
+  [:.mdl-card ^:attrs attrs contents])
 
 (defn card-title
   [title]
@@ -283,57 +270,57 @@
 (defn card-text [text]
   [:.mdl-card__supporting-text text])
 
-(defmdl card-media :card [attrs [content]]
+(defmdlc card-media :card [attrs [content]]
   [:.mdl-card__media ^:attrs attrs content])
 
-(defmdl card-action :card [attrs [content]]
+(defmdlc card-action :card [attrs [content]]
   [:.mdl-card__actions ^:attrs attrs content])
 
-(defmdl card-menu :card [attrs [content]]
+(defmdlc card-menu :card [attrs [content]]
   [:.mdl-card__menu ^:attrs attrs content])
 
 ;;; dialogs
 
 ;;; layout
 
-(defc layout < (rum-mdl :layout) component-handler rum/static
-  [& [attrs contents]]
+(defmdlc layout :layout component-handler rum/static
+  [attrs ^:contents contents]
   [:.mdl-layout.mdl-js-layout ^:attrs attrs contents])
 
 (defn layout-spacer [] [:.mdl-layout-spacer])
 
 (defn layout-title [title] [:.mdl-layout-title title])
 
-(defc header < (rum-mdl :header) rum/static
-  [& [attrs contents]]
+(defmdlc header :header rum/static
+  [attrs ^:contents contents]
   [:header.mdl-layout__header ^:attrs attrs
    [:.mdl-layout__header-row contents]])
 
-(defc nav < (rum-mdl :nav) rum/static
-  [& [attrs contents]]
+(defmdlc nav :nav rum/static
+  [attrs ^:contents contents]
   [:nav.mdl-navigation ^:attrs attrs contents])
 
-(defmdl link "<a>" [attrs contents]
-  [:a.mdl-navigation__link ^:attrs attrs (contents-with-key contents :link)])
+(defmdlc link "<a>" [attrs ^:contents contents]
+  [:a.mdl-navigation__link ^:attrs attrs contents])
 
-(defmdl drawer :drawer [attrs contents]
-  (v [:.mdl-layout__drawer ^:attrs attrs] contents))
+(defmdlc drawer :drawer [attrs ^:contents contents]
+  [:.mdl-layout__drawer ^:attrs attrs contents])
 
-(defmdl main-content :layout [attrs contents]
-  (v [:main.mdl-layout__content ^:attrs attrs] contents))
+(defmdlc main-content :layout [attrs ^:contents contents]
+  [:main.mdl-layout__content ^:attrs attrs contents])
 
-(defc grid < (rum-mdl :grid) rum/static
-  [& [attrs contents]]
+(defmdlc grid :grid rum/static
+  [attrs ^:contents contents]
   [:.mdl-grid ^:attrs attrs contents])
 
-(defc cell < (rum-mdl :cell) rum/static
-  [& [attrs contents]]
+(defmdlc cell :cell rum/static
+  [attrs ^:contents contents]
   [:.mdl-cell ^:attrs attrs contents])
 
 ;;; lists
 
-(defc list < (rum-mdl :list) component-handler rum/static
-  [& [attrs contents]]
+(defmdlc list :list component-handler rum/static
+  [attrs ^:contents contents]
   [:ul.mdl-list ^:attrs attrs contents])
 
 (defn li
@@ -359,7 +346,7 @@
 
 ;;; loading
 
-(defc progress < (rum-mdl :progress) component-handler
+(defmdlc progress :progress component-handler
   #?(:cljs
      {:transfer-state
       (fn [old new]
@@ -381,28 +368,28 @@
           (when buffer
             (.. component (setBuffer buffer))))
         state)}) rum/static
-  [& [attrs]]
+  [attrs]
   [:.mdl-progress.mdl-js-progress ^:attrs attrs])
 
-(defc spinner < (rum-mdl :spinner) component-handler rum/static
-  [& [attrs]]
+(defmdlc spinner :spinner component-handler rum/static
+  [attrs]
   [:.mdl-spinner.mdl-js-spinner ^:attrs
    (let [{:keys [is-active]} attrs]
      (update attrs :class classname {:is-active is-active}))])
 
 ;;; menus
 
-(defc ^{:style/indent 1} menu < (rum-mdl :menu) component-handler rum/static
-  [& [attrs contents]]
+(defmdlc menu :menu component-handler rum/static
+  [attrs ^:contents contents]
   [:ul.mdl-menu.mdl-js-menu ^:attrs attrs contents])
 
-(defmdl menu-item :menu [attrs [content]]
+(defmdlc menu-item :menu [attrs [content]]
   [:li.mdl-menu__item ^:attrs attrs content])
 
 ;;; sliders
 
-(defc slider < (rum-mdl :slider) component-handler rum/static
-  [& [attrs]]
+(defmdlc slider < :slider component-handler rum/static
+  [attrs]
   [:input.mdl-slider.mdl-js-slider ^:attrs
    (-> {:type "range"
         :on-change (fn [_])
@@ -491,8 +478,8 @@
 
 ;;; tables
 
-(defc table < (rum-mdl :table) component-handler rum/static
-  [& [attrs contents]]
+(defmdlc table :table component-handler rum/static
+  [attrs ^:contents contents]
   [:table.mdl-data-table.mdl-js-data-table ^:attrs attrs contents])
 
 (defn thead
@@ -504,10 +491,11 @@
                               (map-indexed #(vector %1 %2))
                               (remove #(nil? (second %))))
                           vattrs)]
-      (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
-                       [:th ^:attrs (mdl-attrs attrs :table) %2]
-                       [:th %2])
-                    (range) heads)))]))
+      (apply vector :tr
+             (map #(if-let [attrs (idx-attrs %1)]
+                     [:th ^:attrs (mdl-attrs attrs :table) %2]
+                     [:th %2])
+                  (range) heads)))]))
 
 (defn tbody
   ([data]
@@ -520,34 +508,35 @@
                                (remove #(nil? (second %))))
                            vattrs)]
        (for [row data]
-         (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
-                          [:td ^:attrs (mdl-attrs attrs :table) %2]
-                          [:td %2])
-                       (range) row)))))]))
+         (apply vector :tr
+                (map #(if-let [attrs (idx-attrs %1)]
+                             [:td ^:attrs (mdl-attrs attrs :table) %2]
+                             [:td %2])
+                          (range) row)))))]))
 
 ;;; textfields
 
-(defc textfield < (rum-mdl :textfield) component-handler rum/static
-  [& [attrs contents]]
+(defmdlc textfield :textfield component-handler rum/static
+  [attrs ^:contents contents]
   [:.mdl-textfield.mdl-js-textfield ^:attrs attrs contents])
 
-(defmdl textfield-input :textfield [attrs [content]]
+(defmdlc textfield-input :textfield [attrs [content]]
   [:input.mdl-textfield__input ^:attrs (merge {:type "text"} attrs) content])
 
-(defmdl textfield-label :textfield [attrs [content]]
+(defmdlc textfield-label :textfield [attrs [content]]
   [:label.mdl-textfield__label ^:attrs attrs content])
 
-(defmdl textfield-error :textfield [attrs [content]]
+(defmdlc textfield-error :textfield [attrs [content]]
   [:span.mdl-textfield__error ^:attrs attrs content])
 
-(defmdl textfield-textarea :textfield [attrs [content]]
+(defmdlc textfield-textarea :textfield [attrs [content]]
   [:textarea.mdl-textfield__input ^:attrs (merge {:type "text"} attrs) content])
 
-(defmdl textfield-expandable-holder :textfield [attrs contents]
-  (v [:.mdl-textfield__expandable-holder ^:attrs attrs] contents))
+(defmdlc textfield-expandable-holder :textfield [attrs ^:contents contents]
+  [:.mdl-textfield__expandable-holder ^:attrs attrs contents])
 
 ;;; tooltips
 
-(defc tooltip < (rum-mdl :tooltip) component-handler rum/static
-  [& [attrs content]]
+(defmdlc tooltip :tooltip component-handler rum/static
+  [attrs [content]]
   [:.mdl-tooltip ^:attrs attrs content])
