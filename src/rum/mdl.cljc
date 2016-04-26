@@ -231,8 +231,8 @@
 
 (defn icon
   ([font] (icon nil font))
-  ([attrs font] [:i.material-icons attrs font])
-  ([tag attrs font] [tag (update attrs :class classname :material-icons) font]))
+  ([attrs font] [:i.material-icons ^:attrs attrs font])
+  ([tag attrs font] [tag ^:attrs (update attrs :class classname :material-icons) font]))
 
 ;;; badges
 
@@ -243,7 +243,7 @@
 
 (defc badge < (rum-mdl :badge) rum/static
   [& [attrs content]]
-  [:span.mdl-badge attrs content])
+  [:span.mdl-badge ^:attrs attrs content])
 
 ;;; buttons
 
@@ -254,17 +254,17 @@
 
 (defc button < (rum-mdl :button) component-handler rum/static
   [& [attrs content]]
-  [:button.mdl-button.mdl-js-button attrs content])
+  [:button.mdl-button.mdl-js-button ^:attrs attrs content])
 
 (defc label-button < (rum-mdl :button) component-handler rum/static
   [& [attrs content]]
-  [:label.mdl-button.mdl-js-button attrs content])
+  [:label.mdl-button.mdl-js-button ^:attrs attrs content])
 
 ;;; cards
 
 (defc card < (rum-mdl :card) rum/static
   [& [attrs content]]
-  [:.mdl-card attrs content])
+  [:.mdl-card ^:attrs attrs content])
 
 (defn card-title
   [title]
@@ -277,13 +277,13 @@
   [:.mdl-card__supporting-text text])
 
 (defmdl card-media :card [attrs [content]]
-  [:.mdl-card__media attrs content])
+  [:.mdl-card__media ^:attrs attrs content])
 
 (defmdl card-action :card [attrs [content]]
-  [:.mdl-card__actions attrs content])
+  [:.mdl-card__actions ^:attrs attrs content])
 
 (defmdl card-menu :card [attrs [content]]
-  [:.mdl-card__menu attrs content])
+  [:.mdl-card__menu ^:attrs attrs content])
 
 ;;; dialogs
 
@@ -291,7 +291,7 @@
 
 (defc layout < (rum-mdl :layout) component-handler rum/static
   [& [attrs contents]]
-  [:.mdl-layout.mdl-js-layout attrs contents])
+  [:.mdl-layout.mdl-js-layout ^:attrs attrs contents])
 
 (defn layout-spacer [] [:.mdl-layout-spacer])
 
@@ -299,35 +299,35 @@
 
 (defc header < (rum-mdl :header) rum/static
   [& [attrs contents]]
-  [:header.mdl-layout__header attrs
+  [:header.mdl-layout__header ^:attrs attrs
    [:.mdl-layout__header-row contents]])
 
 (defc nav < (rum-mdl :nav) rum/static
   [& [attrs contents]]
-  [:nav.mdl-navigation attrs contents])
+  [:nav.mdl-navigation ^:attrs attrs contents])
 
 (defmdl link "<a>" [attrs contents]
-  [:a.mdl-navigation__link attrs (contents-with-key contents :link)])
+  [:a.mdl-navigation__link ^:attrs attrs (contents-with-key contents :link)])
 
 (defmdl drawer :drawer [attrs contents]
-  (v [:.mdl-layout__drawer attrs] contents))
+  (v [:.mdl-layout__drawer ^:attrs attrs] contents))
 
 (defmdl main-content :layout [attrs contents]
-  (v [:main.mdl-layout__content attrs] contents))
+  (v [:main.mdl-layout__content ^:attrs attrs] contents))
 
 (defc grid < (rum-mdl :grid) rum/static
   [& [attrs contents]]
-  [:.mdl-grid attrs contents])
+  [:.mdl-grid ^:attrs attrs contents])
 
 (defc cell < (rum-mdl :cell) rum/static
   [& [attrs contents]]
-  [:.mdl-cell attrs contents])
+  [:.mdl-cell ^:attrs attrs contents])
 
 ;;; lists
 
 (defc list < (rum-mdl :list) component-handler rum/static
   [& [attrs contents]]
-  [:ul.mdl-list attrs contents])
+  [:ul.mdl-list ^:attrs attrs contents])
 
 (defn li
   {:arglists '([attrs? secondary?])}
@@ -340,7 +340,7 @@
         sub      (when sub [:span.mdl-list__item-sub-title sub])
         body     (when body [:span.mdl-list__item-text-body body])
         attrs    (dissoc attrs :icon :avatar :content :sub :body)]
-    [:li.mdl-list__item attrs
+    [:li.mdl-list__item ^:attrs attrs
      [:span.mdl-list__item-primary-content {}
       icon avatar content sub body]
      (when secondary
@@ -375,11 +375,11 @@
             (.. component (setBuffer buffer))))
         state)}) rum/static
   [& [attrs]]
-  [:.mdl-progress.mdl-js-progress attrs])
+  [:.mdl-progress.mdl-js-progress ^:attrs attrs])
 
 (defc spinner < (rum-mdl :spinner) component-handler rum/static
   [& [attrs]]
-  [:.mdl-spinner.mdl-js-spinner
+  [:.mdl-spinner.mdl-js-spinner ^:attrs
    (let [{:keys [is-active]} attrs]
      (update attrs :class classname {:is-active is-active}))])
 
@@ -387,16 +387,16 @@
 
 (defc ^{:style/indent 1} menu < (rum-mdl :menu) component-handler rum/static
   [& [attrs contents]]
-  [:ul.mdl-menu.mdl-js-menu attrs contents])
+  [:ul.mdl-menu.mdl-js-menu ^:attrs attrs contents])
 
 (defmdl menu-item :menu [attrs [content]]
-  [:li.mdl-menu__item attrs content])
+  [:li.mdl-menu__item ^:attrs attrs content])
 
 ;;; sliders
 
 (defc slider < (rum-mdl :slider) component-handler rum/static
   [& [attrs]]
-  [:input.mdl-slider.mdl-js-slider
+  [:input.mdl-slider.mdl-js-slider ^:attrs
    (-> {:type "range"
         :on-change (fn [_])
         :min "0" :max "100"}
@@ -415,7 +415,7 @@
                 (fn [o] (. m (showSnackbar o))))))
      state)}
   [& [{:keys [action] :as attrs} contents]]
-  [:.mdl-snackbar.mdl-js-snackbar attrs
+  [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
    [:button.mdl-snackbar__action (merge {:type "button"} action)]])
 
@@ -449,36 +449,36 @@
 
 (defc checkbox < component-handler (toggle "MaterialCheckbox")
   [{:keys [input label for] :as attrs}]
-  [:label.mdl-checkbox.mdl-js-checkbox
+  [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
-   [:input.mdl-checkbox__input
+   [:input.mdl-checkbox__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
 (defc radio < component-handler (toggle "MaterialRadio") rum/static
   [{:keys [input label for] :as attrs}]
-  [:label.mdl-radio.mdl-js-radio
+  [:label.mdl-radio.mdl-js-radio ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
-   [:input.mdl-radio__button
+   [:input.mdl-radio__button ^:attrs
     (-> {:type "radio" :id for}
       (merge input))]
    [:span.mdl-radio__label label]])
 
 (defc icon-toggle < component-handler (toggle "MaterialIconToggle") rum/static
   [{:keys [input label for] :as attrs}]
-  [:label.mdl-icon-toggle.mdl-js-icon-toggle
+  [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
-   [:input.mdl-icon-toggle__input
+   [:input.mdl-icon-toggle__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
 (defc switch < component-handler (toggle "MaterialSwitch") rum/static
   [{:keys [input for] :as attrs}]
-  [:label.mdl-switch.mdl-js-switch
+  [:label.mdl-switch.mdl-js-switch ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input))
-   [:input.mdl-switch__input
+   [:input.mdl-switch__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
    [:span.mdl-switch__label]])
@@ -487,7 +487,7 @@
 
 (defc table < (rum-mdl :table) component-handler rum/static
   [& [attrs contents]]
-  [:table.mdl-data-table.mdl-js-data-table attrs contents])
+  [:table.mdl-data-table.mdl-js-data-table ^:attrs attrs contents])
 
 (defn thead
   ([heads]
@@ -499,7 +499,7 @@
                               (remove #(nil? (second %))))
                           vattrs)]
       (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
-                       [:th (mdl-attrs attrs :table) %2]
+                       [:th ^:attrs (mdl-attrs attrs :table) %2]
                        [:th %2])
                     (range) heads)))]))
 
@@ -515,7 +515,7 @@
                            vattrs)]
        (for [row data]
          (v [:tr] (map #(if-let [attrs (idx-attrs %1)]
-                          [:td (mdl-attrs attrs :table) %2]
+                          [:td ^:attrs (mdl-attrs attrs :table) %2]
                           [:td %2])
                        (range) row)))))]))
 
@@ -523,29 +523,25 @@
 
 (defc textfield < (rum-mdl :textfield) component-handler rum/static
   [& [attrs contents]]
-  [:.mdl-textfield.mdl-js-textfield attrs contents])
+  [:.mdl-textfield.mdl-js-textfield ^:attrs attrs contents])
 
 (defmdl textfield-input :textfield [attrs [content]]
-  [:input.mdl-textfield__input (merge {:type "text"} attrs) content])
+  [:input.mdl-textfield__input ^:attrs (merge {:type "text"} attrs) content])
 
 (defmdl textfield-label :textfield [attrs [content]]
-  [:label.mdl-textfield__label attrs content])
+  [:label.mdl-textfield__label ^:attrs attrs content])
 
 (defmdl textfield-error :textfield [attrs [content]]
-  [:span.mdl-textfield__error attrs content])
+  [:span.mdl-textfield__error ^:attrs attrs content])
 
 (defmdl textfield-textarea :textfield [attrs [content]]
-  [:textarea.mdl-textfield__input (merge {:type "text"} attrs) content])
+  [:textarea.mdl-textfield__input ^:attrs (merge {:type "text"} attrs) content])
 
 (defmdl textfield-expandable-holder :textfield [attrs contents]
-  (v [:.mdl-textfield__expandable-holder attrs] contents))
+  (v [:.mdl-textfield__expandable-holder ^:attrs attrs] contents))
 
 ;;; tooltips
 
 (defc tooltip < (rum-mdl :tooltip) component-handler rum/static
   [& [attrs content]]
-  [:.mdl-tooltip attrs content])
-
-(comment
-
-  )
+  [:.mdl-tooltip ^:attrs attrs content])
