@@ -2,7 +2,8 @@
  :source-paths #{"src" "examples"}
  :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [rum "0.8.1" :scope "provided"]
+                 [rum "0.8.2" :scope "provided" :exclusions [sablono]]
+                 [sablono "0.7.1"]
 
                  [ajchemist/classname "0.2.1"]
                  [cljsjs/material "1.1.3-1"]
@@ -143,11 +144,13 @@
    (repl :server true)
    ((r serve) :dir "target" :httpkit true)
    (target)
+   (speak)
    (wait)))
 
 (deftask examples []
   (set-env! :source-paths #{"src" "examples"})
-  (require '[adzerk.boot-cljs :refer [cljs]])
+  (require '[adzerk.boot-cljs :refer [cljs]]
+           '[jeluard.boot-notify :refer [notify]])
   (comp
    ((r cljs)
     :ids #{"rum-mdl-examples"}
@@ -155,7 +158,9 @@
     :compiler-options (dissoc simple-opts :optimizations))
    (examples-asset)
    (sift :invert true :include #{#".*.out"})
-   (target :dir #{"target-ghpage"})))
+   (target :dir #{"target-ghpage"})
+   (speak)
+   ((r notify))))
 
 (deftask package []
   (set-env! :resource-paths #{"src"})
