@@ -5,7 +5,9 @@
    [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
                          :cljs [:refer-macros [defc defcc defcs]])]
    [classname.core :refer [classname]]
-   #?(:cljs
+   #?(:clj
+      [sablono.compiler :as s]
+      :cljs
       [cljsjs.material])))
 
 (defn- v [val xs] (reduce conj val xs))
@@ -30,7 +32,7 @@
    :textfield   "MaterialTextfield"
    :tooltip     "MaterialTooltip"
    :checkbox    "MaterialCheckbox"
-   :raido       "MaterialRadio"
+   :radio       "MaterialRadio"
    :icon-toggle "MaterialIconToggle"
    :switch      "MaterialSwitch"})
 
@@ -175,7 +177,8 @@
    (defmacro defmdl
      {:arglists '([name mdl-key? docstring? binding & body])}
      [& xs]
-     (let [[name]    xs
+     (let [arglists  '([& contents] [attrs & contents])
+           [name]    xs
            xs        (rest xs)
            ys        (take-while (complement vector?) xs)
            mdl-key   (first (filter keyword? ys))
@@ -185,7 +188,11 @@
            binding   (first xs)
            a-binding (first binding)
            body      (rest xs)
-           arglists  '([& contents] [attrs & contents])]
+           ;; xs        (rest xs)
+           ;; body      (butlast xs)
+           ;; last-form (last xs)
+           ;; cljs?     (:ns &env)
+           ]
        `(defn ~name ~docstring
           {:arglists '~arglists}
           [& xs#]
@@ -430,11 +437,11 @@
         (let [{[{:keys [checked disabled mdl]}] :rum/args
                this :rum/react-component
                dom  :mdl/dom} state
-              m (aget dom component)]
+              m (aget dom (mdl-component component))]
           (when disabled                ; (. m (enable))
             (. m (disable)))
           (case component
-            "MaterialSwitch"
+            :switch
             (when checked               ; (. m (off))
               (. m (on)))
             (when checked               ; (. m (uncheck))
@@ -443,11 +450,10 @@
             (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
                   ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
               (upgrade-element ripple)
-              (listen-component-downgraded dom
-                                           #(downgrade-elements ripple)))))
+              (listen-component-downgraded dom #(downgrade-elements ripple)))))
         state)}))
 
-(defc checkbox < component-handler (toggle "MaterialCheckbox")
+(defc checkbox < component-handler (toggle :checkbox)
   [{:keys [input label for] :as attrs}]
   [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
@@ -456,7 +462,7 @@
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
-(defc radio < component-handler (toggle "MaterialRadio") rum/static
+(defc radio < component-handler (toggle :radio) rum/static
   [{:keys [input label for] :as attrs}]
   [:label.mdl-radio.mdl-js-radio ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
@@ -465,7 +471,7 @@
       (merge input))]
    [:span.mdl-radio__label label]])
 
-(defc icon-toggle < component-handler (toggle "MaterialIconToggle") rum/static
+(defc icon-toggle < component-handler (toggle :icon-toggle) rum/static
   [{:keys [input label for] :as attrs}]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
@@ -474,7 +480,7 @@
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
-(defc switch < component-handler (toggle "MaterialSwitch") rum/static
+(defc switch < component-handler (toggle :switch) rum/static
   [{:keys [input for] :as attrs}]
   [:label.mdl-switch.mdl-js-switch ^:attrs
    (-> attrs (mdl-attrs :toggle) (dissoc :input))
