@@ -47,3 +47,4 @@ and add a =<link>= tag in your =index.html=.
 
 - https://github.com/google/material-design-lite
 - https://github.com/google/material-design-lite/blob/master/src/mdlComponentHandler.js
+- https://design.google.com/icons/
