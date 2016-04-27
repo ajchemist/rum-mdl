@@ -54,32 +54,33 @@
  push {:repo "deploy-clojars"})
 
 (deftask index-html
-  [t title  TITLE  str "the title of index.html"
-   m meta   META   edn "append to <head>"
-   b body   BODY   edn "append to <body>"
-   s script SCRIPT edn "append to <body>"]
+  [t title  TITLE   str  "the title of index.html"
+   m meta   META    edn  "append to <head>"
+   b body   BODY   [str] "append to <body>"
+   s script SCRIPT  edn  "append to <body>"]
   (let [tmp (tmp-dir!)
         out (jio/file tmp "index.html")
-        env (update (get-env) :dependencies conj
-                    '[hiccup "1.0.5" :scope "test"])
+        env (get-env)
         pod (pod/make-pod env)]
     (info "Generating %s index.html...\n" title)
     (->>
         (pod/with-eval-in pod
-          (require '[hiccup.core :refer [html]])
-          (html
-           "<!doctype html>"
-           [:html
-            [:head
-             [:title ~title]
-             [:meta {:charset "utf-8"}]
-             [:meta {:http-equiv "content-type" :content "text/html;"}]
-             [:meta {:name "viewport" :content "width=device-width,initial-scale=1.0,user-scalable=yes"}]
-             [:meta {:name "title" :content ~title}]
-             (map identity ~meta)]
-            [:body {:tabindex "-1"}
-             (map identity ~body)
-             (map identity ~script)]]))
+          (require '[rum.core :as rum])
+          (-> "<!doctype html>%s"
+            (format
+             (rum/render-static-markup
+              [:html
+               [:head
+                [:title ~title]
+                [:meta {:charset "utf-8"}]
+                [:meta {:http-equiv "content-type" :content "text/html;"}]
+                [:meta {:name "viewport" :content "width=device-width,initial-scale=1.0,user-scalable=yes"}]
+                [:meta {:name "title" :content ~title}]
+                (map identity ~meta)]
+               [:body {:tabindex "-1"}
+                "%s"
+                (map identity ~script)]]))
+            (format (str ~@body))))
         (spit out))
     (with-pre-wrap fileset
       (-> fileset (add-asset tmp) commit!))))
@@ -112,7 +113,10 @@
              [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
              [:link {:rel "stylesheet" :href "material.min.inc.css"}]
              [:link {:rel "stylesheet" :href "rum-mdl-examples.css"}]]
-    :body   [[:div#examples ((r rum/render-html) ((r examples/chrome)))]]
+    :body   (map #(-> ((r rum/render-static-markup) %1)
+                    (format %2))
+                 [[:#examples "%s"]]
+                 [((r rum/render-html) ((r examples/chrome)))])
     :script [[:script {:src "rum-mdl-examples.js"}]
              [:script "window.onload=rum.mdl.examples.onload;"]
              (when-not dev [:script {:src "ga.js"}])])
@@ -126,7 +130,7 @@
   (require 'boot-figwheel
            '[pandeiro.boot-http :refer [serve]])
   (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
-  (comp 
+  (comp
    (examples-asset :dev true)
    ((r figwheel)
     :all-builds [{:id "dev"
