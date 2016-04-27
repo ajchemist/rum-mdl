@@ -42,7 +42,7 @@
         :elide-asserts true}
     (merge common-opts)))
 
-(def +version+ "0.0.1-SNAPSHOT")
+(def +version+ "0.0.1")
 
 (task-options!
  pom {:project 'rum-mdl
