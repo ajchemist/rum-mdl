@@ -133,7 +133,28 @@
      :background [["url('https://getmdl.io/assets/compindex_2x.png')"
                    "no-repeat"
                    "top"
-                   "left/contain"]]}]])
+                   "left/contain"]]}]
+   [:.mdl-components__warning
+    {:width "100%"
+     :max-width "640px"
+     :margin "0 auto"
+     :background-color "#FFF9C4"
+     :padding "16px"
+     :border-radius "2px"
+     :color "#212121"}]
+   [:.modal [:> [:.mdl-button {:width "200px"}]]]]
+  [:.demo.grid
+   [:.mdl-cell
+    {:box-sizing "border-box"
+     :background-color "#BDBDBD"
+     :height "200px"
+     :padding-left "8px"
+     :padding-top "4px"
+     :color "white"}]
+   [:.mdl-grid
+    [:&:first-of-type
+     [:.mdl-cell
+      {:height "50px"}]]]])
 
 (defstylesheetfn css []
   (layout)

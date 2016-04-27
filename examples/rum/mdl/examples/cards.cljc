@@ -1,11 +1,13 @@
 (ns rum.mdl.examples.cards
   (:require
    [rum.core :as rum]
-   [rum.mdl  :as mdl]))
+   [rum.mdl  :as mdl]
+   [rum.mdl.demo :as demo]))
 
 (rum/defc examples
   []
-  [:section.example.cards
+  (demo/section
+   (demo/intro "Cards")
    (mdl/card
     {:mdl [:shadow--2dp]}
     (mdl/card-title "Welcome")
@@ -16,4 +18,4 @@
      {:mdl [:border]}
      (mdl/button "Get Started"))
     (mdl/card-menu
-     (mdl/button {:mdl [:icon :ripple]} (mdl/icon "share"))))])
+     (mdl/button {:mdl [:icon :ripple]} (mdl/icon "share"))))))

@@ -111,7 +111,7 @@
              :bottom :mdl-tooltip--bottom}
 
    :common {:ripple :mdl-js-ripple-effect}
-   
+
    nil {}})
 
 (defn- rename-kw [ks kmap]
@@ -195,7 +195,7 @@
            binding   (first xs)
            contents? (some (complement nil?) (map meta binding))
            body      (rest xs)]
-       `(defc ~(with-meta name `{:arglists '~arglists})
+       `(defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
           ~'< (mdl-type ~typekey ~contents?) ~@mixin
           ~binding ~@body))))
 
@@ -282,6 +282,35 @@
   [:.mdl-card__menu ^:attrs attrs content])
 
 ;;; dialogs
+
+(def dialog-mixin
+  #?(:cljs
+     {:did-mount
+      (fn [state]
+        (let [{this :rum/react-component
+               node :mdl/node} state
+              show-modal (aget node "showModal")
+              dialog?    (or show-modal
+                             (when (exists? js/dialogPolyfill)
+                               (js/dialogPolyfill.registerDialog node)
+                               true))]
+          (when dialog?
+            (aset this "show-modal" #(. node (showModal)))
+            (aset this "show"       #(. node (show)))
+            (aset this "close"      #(. node (close)))))
+        state)}))
+
+(defmdlc ^{:arglists '([{:keys [title content actions full-width]}])}
+  dialog :dialog component-handler dialog-mixin rum/static
+  [{:keys [title content actions full-width] :as attrs}]
+  [:dialog.mdl-dialog ^:attrs
+   (dissoc attrs :title :content)
+   [:h4.mdl-dialog__title title]
+   [:.mdl-dialog__content [:p content]]
+   [:.mdl-dialog__actions
+    {:class (classname {:mdl-dialog__actions--full-width full-width})}
+    (for [a actions]
+      (rum/with-key a (gensym "dialog-action")))]])
 
 ;;; layout
 
@@ -402,7 +431,7 @@
 
 ;;; snackbar
 
-(defc snackbar < component-handler rum/static
+(defmdlc snackbar :snackbar component-handler rum/static
   #?(:cljs
      {:did-mount
       (fn [state]
@@ -411,7 +440,7 @@
               m    (aget node type)]
           (aset this "show-snackbar" #(. m (showSnackbar %))))
         state)})
-  [& [{:keys [action] :as attrs} contents]]
+  [{:keys [action] :as attrs}]
   [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
    [:button.mdl-snackbar__action (merge {:type "button"} action)]])

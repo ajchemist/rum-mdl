@@ -1,7 +1,8 @@
 (ns rum.mdl.examples.layout
   (:require
    [rum.core :as rum]
-   [rum.mdl  :as mdl]))
+   [rum.mdl  :as mdl]
+   [rum.mdl.demo :as demo]))
 
 (rum/defc grid []
   [:.demo.grid
@@ -33,5 +34,6 @@
 
 (rum/defc examples
   []
-  [:section.example
-   (grid)])
+  (demo/section
+   (demo/intro "Layout")
+   (grid)))
