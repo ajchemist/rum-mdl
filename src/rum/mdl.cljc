@@ -11,12 +11,6 @@
       :cljs
       [cljsjs.material])))
 
-(defn- rename-kw [ks kmap]
-  (for [k ks]
-    (if-let [new (kmap k)]
-      new
-      (str "mdl-" (name k)))))
-
 (def mdl-component
   "<typekey, component-name>"
   {:button      "MaterialButton"
@@ -79,9 +73,7 @@
           :bottom-left  :mdl-menu--bottom-left
           :bottom-right :mdl-menu--bottom-right
           :divider      :mdl-menu__item--full-bleed-divider
-          :ripple :mdl-js-ripple-effect}
-
-   :toggle {:ripple :mdl-js-ripple-effect}
+          :ripple       :mdl-js-ripple-effect}
 
    :layout {:fixed-tabs               :mdl-layout--fixed-tabs
             :fixed-drawer             :mdl-layout--fixed-drawer
@@ -118,7 +110,15 @@
              :right  :mdl-tooltip--right
              :bottom :mdl-tooltip--bottom}
 
-   nil {:ripple :mdl-js-ripple-effect}})
+   :common {:ripple :mdl-js-ripple-effect}
+   
+   nil {}})
+
+(defn- rename-kw [ks kmap]
+  (for [k ks]
+    (if-let [new (or (get kmap k) (get (mdl-optional :common) k))]
+      new
+      (str "mdl-" (name k)))))
 
 (defn- attrs-contents [xs]
   (let [[attrs]  xs
@@ -138,8 +138,10 @@
       [:span {:key key} e]
       :else (rum/with-key e key))))
 
-(defn mdl-dom [this]
-  #?(:cljs (:mdl/dom @(rum/state this))))
+(defn node
+  "a dom element node of rum-mdl component"
+  [this]
+  #?(:cljs (:mdl/node @(rum/state this))))
 
 (defn mdl-attrs
   ([attrs]
@@ -161,7 +163,7 @@
                       contents)]
        (assoc new
          :rum/args [attrs contents]
-         :mdl/type typekey)))
+         :mdl/type (mdl-component typekey))))
    :will-mount
    (fn [{args :rum/args :as state}]
      ;; core/type of rum/args is cljs.core/IndexedSeq
@@ -174,7 +176,7 @@
        #_(println (map core/type contents))
        (assoc state
          :rum/args [attrs contents]
-         :mdl/type typekey)))})
+         :mdl/type (mdl-component typekey))))})
 
 #?(:clj
    (defmacro defmdlc
@@ -222,16 +224,16 @@
   #?(:cljs
      {:did-mount
       (fn [state]
-        (let [rc  (:rum/react-component state)
-              dom (js/ReactDOM.findDOMNode rc)]
-          (upgrade-element dom)
-          (assoc state :mdl/dom dom)))
+        (let [this (:rum/react-component state)
+              node (js/ReactDOM.findDOMNode this)]
+          (upgrade-element node)
+          (assoc state :mdl/node node)))
       :will-unmount
       (fn [state]
-        (let [rc  (:rum/react-component state)
-              dom (js/ReactDOM.findDOMNode rc)]
-          (downgrade-elements dom)
-          (dissoc state :mdl/dom)))}))
+        (let [this (:rum/react-component state)
+              node (js/ReactDOM.findDOMNode this)]
+          (downgrade-elements node)
+          (dissoc state :mdl/node)))}))
 
 (defn icon
   ([font] (icon nil font))
@@ -346,28 +348,30 @@
 
 ;;; loading
 
-(defmdlc progress :progress component-handler
+(def progress-mixin
   #?(:cljs
      {:transfer-state
       (fn [old new]
         (let [{[{:keys [progress buffer]}] :rum/args} new
-              dom (:mdl/dom old)
-              component (aget dom "MaterialProgress")]
+              {node :mdl/node type :mdl/type} old
+              m (aget node type)]
           (when progress
-            (.. component (setProgress progress)))
+            (.. m (setProgress progress)))
           (when buffer
-            (.. component (setBuffer buffer)))
-          (assoc new :mdl/dom dom)))
+            (.. m (setBuffer buffer)))
+          (assoc new :mdl/node node)))
       :did-mount
       (fn [state]
         (let [{[{:keys [progress buffer]}] :rum/args
-               dom :mdl/dom} state
-              component (aget dom "MaterialProgress")]
+               node :mdl/node type :mdl/type} state
+              m (aget node type)]
           (when progress
-            (.. component (setProgress progress)))
+            (.. m (setProgress progress)))
           (when buffer
-            (.. component (setBuffer buffer))))
-        state)}) rum/static
+            (.. m (setBuffer buffer))))
+        state)}))
+
+(defmdlc progress :progress component-handler progress-mixin rum/static
   [attrs]
   [:.mdl-progress.mdl-js-progress ^:attrs attrs])
 
@@ -388,7 +392,7 @@
 
 ;;; sliders
 
-(defmdlc slider < :slider component-handler rum/static
+(defmdlc slider :slider component-handler rum/static
   [attrs]
   [:input.mdl-slider.mdl-js-slider ^:attrs
    (-> {:type "range"
@@ -399,15 +403,14 @@
 ;;; snackbar
 
 (defc snackbar < component-handler rum/static
-  {:did-mount
-   (fn [state]
-     #?(:cljs
-        (let [this (:rum/react-component state)
-              dom  (:mdl/dom state)
-              m    (aget dom "MaterialSnackbar")]
-          (aset this "show-snackbar"
-                (fn [o] (. m (showSnackbar o))))))
-     state)}
+  #?(:cljs
+     {:did-mount
+      (fn [state]
+        (let [{this :rum/react-component
+               node :mdl/node type :mdl/type} state
+              m    (aget node type)]
+          (aset this "show-snackbar" #(. m (showSnackbar %))))
+        state)})
   [& [{:keys [action] :as attrs} contents]]
   [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
@@ -415,62 +418,61 @@
 
 ;;; toggles
 
-(defn toggle
-  "workaround mixin"
-  [component]
+(def toggle
+  "workaround mixin for toggle"
   #?(:cljs
      {:did-mount
       (fn [state]
-        (let [{[{:keys [checked disabled mdl]}] :rum/args
+        (let [{[{:keys [checked disabled]}] :rum/args
                this :rum/react-component
-               dom  :mdl/dom} state
-              m (aget dom (mdl-component component))]
+               node :mdl/node type :mdl/type} state
+              m (aget node type)]
           (when disabled                ; (. m (enable))
             (. m (disable)))
-          (case component
-            :switch
+          (case type
+            "MaterialSwitch"
             (when checked               ; (. m (off))
               (. m (on)))
             (when checked               ; (. m (uncheck))
               (. m (check))))
-          (when (some #{:ripple} mdl)
-            (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
-                  ripple   (.querySelector dom selector)] ; could be ".mdl-js-ripple-effect"
+          (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
+                ripple   (.querySelector node selector)] ; could be ".mdl-js-ripple-effect"
+            (when ripple
               (upgrade-element ripple)
-              (listen-component-downgraded dom #(downgrade-elements ripple)))))
+              (listen-component-downgraded node #(downgrade-elements ripple)))))
         state)}))
 
-(defc checkbox < component-handler (toggle :checkbox)
+(defmdlc checkbox :checkbox component-handler toggle rum/static
   [{:keys [input label for] :as attrs}]
   [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
-   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   (dissoc attrs :input :label)
    [:input.mdl-checkbox__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
-(defc radio < component-handler (toggle :radio) rum/static
+(defmdlc radio :radio component-handler toggle rum/static
   [{:keys [input label for] :as attrs}]
   [:label.mdl-radio.mdl-js-radio ^:attrs
-   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   (dissoc attrs :input :label)
    [:input.mdl-radio__button ^:attrs
     (-> {:type "radio" :id for}
       (merge input))]
    [:span.mdl-radio__label label]])
 
-(defc icon-toggle < component-handler (toggle :icon-toggle) rum/static
+(defmdlc icon-toggle :icon-toggle component-handler toggle rum/static
   [{:keys [input label for] :as attrs}]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
-   (-> attrs (mdl-attrs :toggle) (dissoc :input :label))
+   (dissoc attrs :input :label)
    [:input.mdl-icon-toggle__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
-(defc switch < component-handler (toggle :switch) rum/static
+(defmdlc switch :switch component-handler toggle rum/static
   [{:keys [input for] :as attrs}]
   [:label.mdl-switch.mdl-js-switch ^:attrs
-   (-> attrs (mdl-attrs :toggle) (dissoc :input))
+   (dissoc attrs :input)
    [:input.mdl-switch__input ^:attrs
     (-> {:type "checkbox" :id for}
       (merge input))]
