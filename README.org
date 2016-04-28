@@ -1,6 +1,7 @@
 #+STARTUP: content
 #+TITLE: rum-mdl
 #+AUTHOR: aJchemist
+#+DESCRIPTION: Reusable material-design-lite react components written with rum
 #+UPDATE: Sun Apr 24 15:39:51 2016
 #+LINK: rum   https://github.com/tonsky/rum
 #+LINK: react https://facebook.github.io/react/
@@ -26,14 +27,17 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
    '[rum.mdl  :as mdl])
 #+end_src
 
-Default mdl stylesheet is required for proper site rendering.
+Normally default mdl stylesheet is required for proper site rendering.
 
-As you are using [[boot]], then you can retrieve the css file with =sift= task.
+As you are using [[boot]], then you can retrieve mdl css files with =sift= task from =cljsjs/material= jar.
+#+begin_quote
+If you're using order version of boot than =2.6.0=,
+
+you should add additional dep coord =[cljsjs/material "x.y.z-w"]=. (See [[https://github.com/boot-clj/boot/commit/4fde407d830fae5ab64448890c0bc54f1d3e3062][details]].)
+#+end_quote
 
 #+NAME: asset
 #+begin_src clojure
-  ;; first, add [cljsjs/material "x.y.z-w"] into :dependencies
-
   (sift :add-jar {'cljsjs/material #".*.css$"})
   (sift :move {#".*/material.inc.css"     "material.inc.css"
                #".*/material.min.inc.css" "material.min.inc.css"})
@@ -50,3 +54,9 @@ and add a =<link>= tag in your =index.html=.
 - https://github.com/google/material-design-lite
 - https://github.com/google/material-design-lite/blob/master/src/mdlComponentHandler.js
 - https://design.google.com/icons/
+
+** License
+
+Copyright © 2016 aJchemist
+
+Licensed under Eclipse Public License.

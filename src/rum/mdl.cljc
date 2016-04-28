@@ -358,19 +358,18 @@
   {:arglists '([attrs? secondary?])}
   [& xs]
   (let [[attrs [secondary]] (attrs-contents xs)
-        attrs            (mdl-attrs attrs :list)
+        attrs  (mdl-attrs attrs :list)
         {:keys [icon avatar content sub body]} attrs
-        icon     (when icon [:i.material-icons.mdl-list__item-icon icon])
-        avatar   (when avatar [:i.material-icons.mdl-list__item-avatar avatar])
-        sub      (when sub [:span.mdl-list__item-sub-title sub])
-        body     (when body [:span.mdl-list__item-text-body body])
-        attrs    (dissoc attrs :icon :avatar :content :sub :body)]
+        icon   (when icon   [:i.material-icons.mdl-list__item-icon icon])
+        avatar (when avatar [:i.material-icons.mdl-list__item-avatar avatar])
+        sub    (when sub    [:span.mdl-list__item-sub-title sub])
+        body   (when body   [:span.mdl-list__item-text-body body])
+        attrs  (dissoc attrs :icon :avatar :content :sub :body)]
     [:li.mdl-list__item ^:attrs attrs
-     [:span.mdl-list__item-primary-content {}
-      icon avatar content sub body]
+     [:span.mdl-list__item-primary-content {} icon avatar content sub body]
      (when secondary
        (let [{:keys [info action]} secondary
-             info   (when info [:span.mdl-list__item-secondary-info info])
+             info   (when info   [:span.mdl-list__item-secondary-info info])
              action (when action [:a.mdl-list__item-secondary-action action])]
          [:span.mdl-list__item-secondary-content {}
           info action]))]))
@@ -437,7 +436,7 @@
       (fn [state]
         (let [{this :rum/react-component
                node :mdl/node type :mdl/type} state
-              m    (aget node type)]
+              m (aget node type)]
           (aset this "show-snackbar" #(. m (showSnackbar %))))
         state)})
   [{:keys [action] :as attrs}]
@@ -518,10 +517,10 @@
    (thead nil heads))
   ([vattrs heads]
    [:thead
-    (let [idx-attrs (into {} (comp
-                              (map-indexed #(vector %1 %2))
-                              (remove #(nil? (second %))))
-                          vattrs)]
+    (let [idx-attrs (->> vattrs
+                      (into {} (comp
+                                (map-indexed #(vector %1 %2))
+                                (remove #(nil? (second %))))))]
       (apply vector :tr
              (map #(if-let [attrs (idx-attrs %1)]
                      [:th ^:attrs (mdl-attrs attrs :table) %2]
@@ -534,16 +533,16 @@
   ([vattrs data]
    [:tbody
     (contents-with-key
-     (let [idx-attrs (into {} (comp
-                               (map-indexed #(vector %1 %2))
-                               (remove #(nil? (second %))))
-                           vattrs)]
+     (let [idx-attrs (->> vattrs
+                       (into {} (comp
+                                 (map-indexed #(vector %1 %2))
+                                 (remove #(nil? (second %))))))]
        (for [row data]
          (apply vector :tr
                 (map #(if-let [attrs (idx-attrs %1)]
-                             [:td ^:attrs (mdl-attrs attrs :table) %2]
-                             [:td %2])
-                          (range) row)))))]))
+                        [:td ^:attrs (mdl-attrs attrs :table) %2]
+                        [:td %2])
+                     (range) row)))))]))
 
 ;;; textfields
 

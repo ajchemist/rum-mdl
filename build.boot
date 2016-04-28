@@ -1,3 +1,5 @@
+(defmacro ^:private r [sym] `(resolve '~sym))
+
 (set-env!
  :source-paths #{"src" "examples"}
  :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
@@ -21,8 +23,6 @@
 (require '[adzerk.bootlaces :refer :all]
          '[boot.pod :as pod]
          '[clojure.java.io :as jio])
-
-(defmacro ^:private r [sym] `(resolve '~sym))
 
 (def ^:private common-opts
   {:cache-analysis true
@@ -117,9 +117,9 @@
                     (format %2))
                  [[:#examples "%s"]]
                  [((r rum/render-html) ((r examples/chrome)))])
-    :script [[:script {:src "rum-mdl-examples.js"}]
-             [:script "window.onload=rum.mdl.examples.onload;"]
-             (when-not dev [:script {:src "ga.js"}])])
+    :script [(when-not dev [:script {:src "ga.js"}])
+             [:script {:src "rum-mdl-examples.js"}]
+             [:script "window.onload=rum.mdl.examples.onload;"]])
    (sift :add-jar {'cljsjs/material #".*.css$"})
    (sift :move {#".*/material.min.inc.css" "material.min.inc.css"})
    (sift :invert true :include #{#"cljsjs"})
