@@ -127,16 +127,22 @@
         contents (if map? (rest xs) xs)]
     [attrs contents]))
 
+(defn- lazy-seq? [x]
+  (instance? #?(:clj clojure.lang.LazySeq :cljs LazySeq) x))
+
 (defn- contents-with-key [contents & [key]]
-  (for [e contents :let [key (gensym key)]]
-    (cond
-      (vector? e)
-      (if (map? (get e 1))
-        (assoc-in e [1 :key] key)
-        (apply vector (first e) {:key key} (rest e)))
-      (string? e)
-      [:span {:key key} e]
-      :else (rum/with-key e key))))
+  (let [[s] contents]
+    (if (lazy-seq? s)
+      s
+      (for [e contents :let [key (gensym key)]]
+        (cond
+          (vector? e)
+          (if (map? (get e 1))
+            (assoc-in e [1 :key] key)
+            (apply vector (first e) {:key key} (rest e)))
+          (string? e)
+          [:span {:key key} e]
+          :else (rum/with-key e key))))))
 
 (defn node
   "a dom element node of rum-mdl component"

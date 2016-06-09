@@ -23,6 +23,13 @@
    (demo/snippet
     {:components
      [(mdl/list
+       (for [x [1 2 3]]
+         (mdl/li {:key (str "gen" x) :icon "person" :content (str x)})))]
+     :captions
+     ["Iteration"]})
+   (demo/snippet
+    {:components
+     [(mdl/list
        (mdl/li {:icon "person" :content "React"}
                {:action (badge/my-badge badge/counter)})
        (mdl/li {:icon "person" :content "Rum"}
