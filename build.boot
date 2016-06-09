@@ -2,36 +2,37 @@
 
 (set-env!
  :source-paths #{"src" "examples"}
- :dependencies '[[org.clojure/clojure "1.7.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [rum "0.8.3" :scope "provided"]
+ :dependencies
+ '[[org.clojure/clojure "1.7.0" :scope "provided"]
+   [org.clojure/clojurescript "1.9.36" :scope "provided"]
+   [rum "0.9.0" :scope "provided"]
 
-                 [ajchemist/classname "0.2.1"]
-                 [cljsjs/material "1.1.3-1"]
+   [ajchemist/classname "0.2.1"]
+   [cljsjs/material "1.1.3-1"]
 
-                 [garden "1.3.2" :scope "test"]
-                 [adzerk/bootlaces "0.1.13" :scope "test"]
-                 [adzerk/boot-cljs "1.7.228-1" :scope "test"]
-                 [adzerk/boot-reload "0.4.7" :scope "test"]
-                 [pandeiro/boot-http "0.7.3" :scope "test"]
-                 [jeluard/boot-notify "0.2.1" :scope "test"]
-                 [ajchemist/boot-figwheel "0.5.2-2" :scope "test"]
-                 [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-                 [com.cemerick/piggieback "0.2.1"  :scope "test"]
-                 [figwheel-sidecar "0.5.2" :scope "test"]])
+   [garden "1.3.2" :scope "test"]
+   [adzerk/bootlaces "0.1.13" :scope "test"]
+   [adzerk/boot-cljs "1.7.228-1" :scope "test"]
+   [adzerk/boot-reload "0.4.7" :scope "test"]
+   [pandeiro/boot-http "0.7.3" :scope "test"]
+   [ajchemist/boot-figwheel "0.5.2-2" :scope "test"]
+   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+   [com.cemerick/piggieback "0.2.1"  :scope "test"]
+   [figwheel-sidecar "0.5.3-2" :scope "test"]])
 
-(require '[adzerk.bootlaces :refer :all]
-         '[boot.pod :as pod]
-         '[clojure.java.io :as jio])
+(require
+ '[adzerk.bootlaces :refer :all]
+ '[boot.pod :as pod]
+ '[clojure.java.io :as jio])
 
 (def ^:private common-opts
-  {:cache-analysis true
-   :warnings {:single-segment-namespace false}
+  {:warnings {:single-segment-namespace false}
    :compiler-stats true
    :parallel-build true})
 
 (def none-opts
   (->> {:optimizations :none
+        :cache-analysis true
         :source-map true
         :source-map-timestamp true}
     (merge common-opts)))
@@ -39,7 +40,10 @@
 (def simple-opts
   (->> {:optimizations :simple
         :closure-defines {:goog.DEBUG false}
-        :elide-asserts true}
+        :elide-asserts true
+        :pretty-print false
+        :optimize-constants true
+        :static-fns true}
     (merge common-opts)))
 
 (def +version+ "0.0.1")
@@ -66,8 +70,8 @@
     (->>
         (pod/with-eval-in pod
           (require '[rum.core :as rum])
-          (-> "<!doctype html>%s"
-            (format
+          (-> "<!doctype html>"
+            (str
              (rum/render-static-markup
               [:html
                [:head
@@ -81,7 +85,7 @@
                 "%s"
                 (map identity ~script)]]))
             (format (str ~@body))))
-        (spit out))
+      (spit out))
     (with-pre-wrap fileset
       (-> fileset (add-asset tmp) commit!))))
 
@@ -127,8 +131,9 @@
         :opts  {:pretty-print? false})))
 
 (deftask dev []
-  (require 'boot-figwheel
-           '[pandeiro.boot-http :refer [serve]])
+  (require
+   'boot-figwheel
+   '[pandeiro.boot-http :refer [serve]])
   (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
   (comp
    (examples-asset :dev true)
@@ -146,14 +151,16 @@
                        :open-file-command "emacsclient"})
    (repl :server true)
    ((r serve) :dir "target" :httpkit true)
-   (target)
    (speak)
+   (target)
+   #_(target :dir #{"target"} :no-clean true)
+   #_(watch )
    (wait)))
 
 (deftask examples []
   (set-env! :source-paths #{"src" "examples"})
-  (require '[adzerk.boot-cljs :refer [cljs]]
-           '[jeluard.boot-notify :refer [notify]])
+  (require
+   '[adzerk.boot-cljs :refer [cljs]])
   (comp
    ((r cljs)
     :ids #{"rum-mdl-examples"}
@@ -161,13 +168,14 @@
     :compiler-options (dissoc simple-opts :optimizations))
    (examples-asset)
    (sift :invert true :include #{#".*.out"})
-   (target :dir #{"target-ghpage"})
+   (target :dir #{"docs"} :no-clean true)
    (speak)
-   ((r notify))))
+   (notify)))
 
 (deftask package []
   (set-env! :resource-paths #{"src"})
   (build-jar))
 
+;;; BOOT_JVM_OPTIONS="-XX:+AggressiveOpts -Xverify:none -Dclojure.compiler.elide-meta=\"[:doc :file :added :line\"]"
 ;;; boot -P package push-snapshot
 ;;; boot -P -d rum-mdl: show -d

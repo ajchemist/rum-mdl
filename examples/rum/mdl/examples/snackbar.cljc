@@ -4,16 +4,19 @@
    [rum.mdl  :as mdl]
    [rum.mdl.demo :as demo]))
 
+#?(:cljs
+   (defn rand-color []
+     (str "#"
+          (-> (rand)
+            (* 0xffffff)
+            (js/Math.floor)
+            (.toString 16)))))
+
 (let [color (volatile! "")]
   (defn on-click-fn [this]
     #?(:cljs
        (fn [_]
-         (->> (-> (js/Math.random)
-                (* 0xFFFFFF)
-                (js/Math.floor)
-                (.toString 16))
-           (str "#")
-           (vreset! color))
+         (vreset! color (rand-color))
          (rum/request-render this)
          (let [show-snackbar (aget this "refs" "snackbar" "show-snackbar")]
            (show-snackbar
