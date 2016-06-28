@@ -18,8 +18,8 @@
        (fn [_]
          (vreset! color (rand-color))
          (rum/request-render this)
-         (let [show-snackbar (aget this "refs" "snackbar" "show-snackbar")]
-           (show-snackbar
+         (let [snackbar (aget this "refs" "snackbar")]
+           (mdl/show-snackbar snackbar
             #js {:message "Button color changed."
                  :timeout 1200
                  :actionHandler (fn [_]
@@ -47,8 +47,8 @@
           :on-click
           (fn [_]
             (vswap! counter inc)
-            (let [show-snackbar (aget this "refs" "snackbar" "show-snackbar")]
-              (show-snackbar
+            (let [snackbar (aget this "refs" "snackbar")]
+              (mdl/show-snackbar snackbar
                #js {:message (str "Example Message #" @counter)})))}
          "Show Toast")])))
 

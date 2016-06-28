@@ -437,18 +437,18 @@
 ;;; snackbar
 
 (defmdlc snackbar :snackbar component-handler rum/static
-  #?(:cljs
-     {:did-mount
-      (fn [state]
-        (let [{this :rum/react-component
-               node :mdl/node type :mdl/type} state
-              m (aget node type)]
-          (aset this "show-snackbar" #(. m (showSnackbar %))))
-        state)})
   [{:keys [action] :as attrs}]
   [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
    [:button.mdl-snackbar__action (merge {:type "button"} action)]])
+
+(defn show-snackbar
+  {:style/indent [1]}
+  [component data]
+  (let [{node :mdl/node type :mdl/type} @(rum/state component)]
+    (-> node
+      (aget type)
+      (.showSnackbar data))))
 
 ;;; toggles
 
