@@ -162,7 +162,7 @@
        (dissoc :mdl)))))
 
 (defn mdl-type [typekey contents?]
-  {:transfer-state
+  {:transfer-state ;; this will be removed since next rum release
    (fn [_ {args :rum/args :as new}]
      (let [[attrs contents] (attrs-contents args)
            attrs    (mdl-attrs attrs typekey)
@@ -230,7 +230,10 @@
 (def component-handler
   "only for `mdl-js-*' classed component"
   #?(:cljs
-     {:did-mount
+     {:transfer-state ;; this will be removed since next rum release
+      (fn [old new]
+        (assoc new :mdl/node (:mdl/node old)))
+      :did-mount
       (fn [state]
         (let [this (:rum/react-component state)
               node (js/ReactDOM.findDOMNode this)]
@@ -404,7 +407,7 @@
 
 (def progress-mixin
   #?(:cljs
-     {:transfer-state
+     {:transfer-state ;; this will be removed since next rum release
       (fn [old new]
         (let [{[{:keys [progress buffer]}] :rum/args} new
               {node :mdl/node type :mdl/type} old
