@@ -2,7 +2,7 @@
 #+TITLE: rum-mdl
 #+AUTHOR: aJchemist
 #+DESCRIPTION: Reusable material-design-lite react components written with rum
-#+UPDATE: Sun Apr 24 15:39:51 2016
+#+UPDATE: Thu Jun 30 11:58:29 2016
 #+LINK: rum   https://github.com/tonsky/rum
 #+LINK: react https://facebook.github.io/react/
 #+LINK: mdl   https://getmdl.io
@@ -16,7 +16,7 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: dependencies
 #+begin_src clojure
-  [rum "0.8.3"]
+  [rum "0.9.1"]
   [rum-mdl "0.0.1"]
 #+end_src
 
