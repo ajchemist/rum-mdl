@@ -92,6 +92,8 @@
    :header {:scroll    :mdl-layout__header--scroll
             :waterfall :mdl-layout__header--waterfall}
 
+   :footer {}
+
    :nav {:large-screen-only :mdl-layout--large-screen-only
          :small-screen-only :mdl-layout--small-screen-only}
 
@@ -354,6 +356,24 @@
   [attrs ^:contents contents]
   [:.mdl-cell ^:attrs attrs contents])
 
+(defmdlc mini-footer :footer rum/static
+  [attrs ^:contents contents]
+  [:footer.mdl-mini-footer attrs contents])
+
+(defn mini-footer-left-section [& contents]
+  (apply vector :.mdl-mini-footer__left-section contents))
+
+(defn mini-footer-right-section [& contents]
+  (apply vector :.mdl-mini-footer__right-section contents))
+
+(defn mini-footer-list [& contents]
+  (apply vector :ul.mdl-mini-footer__link-list contents))
+
+(defn mini-footer-social-button
+  ([content] [:li.mdl-mini-footer__social-btn {} content])
+  ([attrs content] [:.mdl-mini-footer__social-btn ^:attrs attrs content])
+  ([tag attrs content] [tag ^:attrs (update attrs :class classname :mdl-mini-footer__social-btn) content]))
+
 ;;; lists
 
 (defmdlc list :list component-handler rum/static
@@ -442,13 +462,14 @@
    [:.mdl-snackbar__text]
    [:button.mdl-snackbar__action (merge {:type "button"} action)]])
 
-(defn show-snackbar
-  {:style/indent [1]}
-  [component data]
-  (let [{node :mdl/node type :mdl/type} @(rum/state component)]
-    (-> node
-      (aget type)
-      (.showSnackbar data))))
+#?(:cljs
+   (defn show-snackbar
+     {:style/indent [1]}
+     [component data]
+     (let [{node :mdl/node type :mdl/type} @(rum/state component)]
+       (-> node
+         (aget type)
+         (.showSnackbar data)))))
 
 ;;; toggles
 

@@ -26,7 +26,7 @@
 (defn link [ctor image-path label]
   [:a {:on-click (fn [_] #?(:cljs (rum/mount (ctor) (el "mount"))))}
    [:.link-image
-    {:style {:background-image (str "url(https://getmdl.io" image-path ")")}}]
+    {:style {:background-image (str "url(//getmdl.io" image-path ")")}}]
    [:.label label]])
 
 (rum/defc aside-components-nav []
@@ -56,7 +56,7 @@
    (mdl/cell
     {:mdl [:12]}
     (aside-components-nav)
-    [:#mount (front)])))
+    [:#mount])))
 
 (rum/defc chrome []
   (mdl/layout
@@ -72,7 +72,9 @@
 
 (defn ^:export onload []
   #?(:cljs ;; root mounting
-     (rum/mount (chrome) (el "examples"))))
+     (let []
+       (rum/mount (chrome) (el "examples"))
+       (rum/mount (front)  (el "mount")))))
 
 (comment
   #?(:cljs (rum/mount (rum.mdl.examples.buttons/examples)
