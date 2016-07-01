@@ -16,8 +16,8 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: dependencies
 #+begin_src clojure
-  [rum "0.9.1"]
-  [rum-mdl "0.0.1"]
+  [rum "0.10.0"]
+  [rum-mdl "0.1.0"]
 #+end_src
 
 #+NAME: require
@@ -54,6 +54,20 @@ and add a =<link>= tag in your =index.html=.
 - https://github.com/google/material-design-lite
 - https://github.com/google/material-design-lite/blob/master/src/mdlComponentHandler.js
 - https://design.google.com/icons/
+
+** TODO Todo List
+
+- Full wrapping mdl components
+
+  Here is the list of components which are not wrapped yet.
+
+  - cards
+  - tabs
+  - footer
+
+- Documentation
+  - introduction
+  - rich code section in the [[https://ajchemist.github.io/rum-mdl][example]] pages
 
 ** License
 
