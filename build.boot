@@ -8,7 +8,7 @@
 
    [org.clojure/clojure "1.8.0" :scope "provided"]
    [org.clojure/clojurescript "1.9.93" :scope "provided"]
-   [rum "0.10.0" :scope "provided"]
+   [rum "0.10.2" :scope "provided"]
    [garden "1.3.2" :scope "test"]
    [binaryage/devtools "0.7.2" :scope "test"]
    [ajchemist/boot-figwheel "0.5.4-5" :scope "test"]

@@ -16,7 +16,7 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: dependencies
 #+begin_src clojure
-  [rum "0.10.0"]
+  [rum "0.10.2"]
   [rum-mdl "0.1.0"]
 #+end_src
 
