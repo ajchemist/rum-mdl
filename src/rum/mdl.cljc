@@ -162,16 +162,14 @@
        (dissoc :mdl)))))
 
 (defn mdl-type [typekey contents?]
-  {:transfer-state ;; this will be removed since next rum release
+  {:did-remount
    (fn [_ {args :rum/args :as new}]
      (let [[attrs contents] (attrs-contents args)
            attrs    (mdl-attrs attrs typekey)
            contents (if contents?
                       (contents-with-key contents typekey)
                       contents)]
-       (assoc new
-         :rum/args [attrs contents]
-         :mdl/type (mdl-component typekey))))
+       (assoc new :rum/args [attrs contents])))
    :will-mount
    (fn [{args :rum/args :as state}]
      ;; core/type of rum/args is cljs.core/IndexedSeq
@@ -230,10 +228,7 @@
 (def component-handler
   "only for `mdl-js-*' classed component"
   #?(:cljs
-     {:transfer-state ;; this will be removed since next rum release
-      (fn [old new]
-        (assoc new :mdl/node (:mdl/node old)))
-      :did-mount
+     {:did-mount
       (fn [state]
         (let [this (:rum/react-component state)
               node (js/ReactDOM.findDOMNode this)]
@@ -294,25 +289,34 @@
 
 ;;; dialogs
 
-(def dialog-mixin
+#?(:cljs
+   (defn- dialog?
+     [node]
+     (or (aget node "showModal")
+         (when (exists? js/dialogPolyfill)
+           (js/dialogPolyfill.registerDialog node)
+           true))))
+
+(defn show-modal [component]
   #?(:cljs
-     {:did-mount
-      (fn [state]
-        (let [{this :rum/react-component
-               node :mdl/node} state
-              show-modal (aget node "showModal")
-              dialog?    (or show-modal
-                             (when (exists? js/dialogPolyfill)
-                               (js/dialogPolyfill.registerDialog node)
-                               true))]
-          (when dialog?
-            (aset this "show-modal" #(. node (showModal)))
-            (aset this "show"       #(. node (show)))
-            (aset this "close"      #(. node (close)))))
-        state)}))
+     (let [node (node component)]
+       (when (dialog? node)
+         (. node (showModal))))))
+
+(defn show-dialog [component]
+  #?(:cljs
+     (let [node (node component)]
+       (when (dialog? node)
+         (. node (show))))))
+
+(defn close-dialog [component]
+  #?(:cljs
+     (let [node (node component)]
+       (when (dialog? node)
+         (. node (close))))))
 
 (defmdlc ^{:arglists '([{:keys [title content actions full-width]}])}
-  dialog :dialog component-handler dialog-mixin rum/static
+  dialog :dialog component-handler rum/static
   [{:keys [title content actions full-width] :as attrs}]
   [:dialog.mdl-dialog ^:attrs
    (dissoc attrs :title :content)
@@ -320,8 +324,8 @@
    [:.mdl-dialog__content [:p content]]
    [:.mdl-dialog__actions
     {:class (classname {:mdl-dialog__actions--full-width full-width})}
-    (for [a actions]
-      (rum/with-key a (gensym "dialog-action")))]])
+    (for [action actions]
+      (rum/with-key action (gensym "dialog-action")))]])
 
 ;;; layout
 
@@ -407,16 +411,17 @@
 
 (def progress-mixin
   #?(:cljs
-     {:transfer-state ;; this will be removed since next rum release
-      (fn [old new]
-        (let [{[{:keys [progress buffer]}] :rum/args} new
-              {node :mdl/node type :mdl/type} old
+     {:did-remount
+      (fn [_ new]
+        (let [{[{:keys [progress buffer]}] :rum/args
+               node :mdl/node
+               type :mdl/type} new 
               m (aget node type)]
           (when progress
             (.. m (setProgress progress)))
           (when buffer
-            (.. m (setBuffer buffer)))
-          (assoc new :mdl/node node)))
+            (.. m (setBuffer buffer))))
+        new)
       :did-mount
       (fn [state]
         (let [{[{:keys [progress buffer]}] :rum/args

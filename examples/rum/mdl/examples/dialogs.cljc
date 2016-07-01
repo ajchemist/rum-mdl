@@ -9,7 +9,7 @@
    (mdl/button
     {:mdl [:primary :ripple]
      :on-click
-     #((aget this "refs" "modal" "show-modal"))}
+     #(mdl/show-modal (aget this "refs" "modal"))}
     "Show Modal")
    (-> (mdl/dialog
         {:title "Rum-MDL"
@@ -18,7 +18,7 @@
          [(mdl/button
            {:mdl [:accent]
             :on-click
-            #((aget this "refs" "modal" "close"))}
+            #(mdl/close-dialog (aget this "refs" "modal"))}
            "Agree")
           (mdl/button {:key "disagree" :class "close" :disabled true} "Disagree")]})
      (rum/with-ref "modal"))])

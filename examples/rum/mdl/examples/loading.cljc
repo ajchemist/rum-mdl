@@ -8,9 +8,13 @@
 (def activated (atom false))
 
 (defn increase []
-  (if (< @progress 100)
-    (swap! progress inc)
-    (reset! progress 0)))
+  #?(:cljs
+     (if (< @progress 100)
+       (swap! progress inc)
+       (do
+         (js/clearInterval (aget js/window :interval))
+         (reset! activated false)
+         (reset! progress 0)))))
   
 (rum/defc my-progress < rum/reactive []
   (mdl/progress {:progress (rum/react progress)}))
@@ -22,7 +26,7 @@
                  #?(:cljs
                     (if @activated
                       (js/clearInterval (aget js/window :interval))
-                      (aset js/window :interval (js/setInterval increase 100))))
+                      (aset js/window :interval (js/setInterval increase 50))))
                  (swap! activated not))}
    (if (rum/react activated) "Clear" "Activate")))
 
@@ -49,6 +53,6 @@
     (mdl/spinner {:is-active true})
     "Default"
     (mdl/spinner {:mdl [:single-color] :is-active true})
-    "Spinner"
+    "Single color"
     (mdl/spinner)
     "Inactive")))
