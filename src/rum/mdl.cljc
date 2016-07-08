@@ -144,7 +144,7 @@
             (apply vector (first e) {:key key} (rest e)))
           (string? e)
           [:span {:key key} e]
-          :else (rum/with-key e key))))))
+          :else (if (aget e "key") e (rum/with-key e key)))))))
 
 (defn node
   "a dom element node of rum-mdl component"
@@ -199,7 +199,7 @@
            mixin     (remove #(or (keyword? %) (string? %)) ys)
            xs        (drop-while (complement vector?) xs)
            binding   (first xs)
-           contents? (some (complement nil?) (map meta binding))
+           contents? (->> binding (map meta) (map :contents) (some boolean))
            body      (rest xs)]
        `(defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
           ~'< (mdl-type ~typekey ~contents?) ~@mixin
@@ -581,7 +581,7 @@
 
 ;;; textfields
 
-(defmdlc textfield :textfield component-handler rum/static
+(defmdlc textfield :textfield component-handler
   [attrs ^:contents contents]
   [:.mdl-textfield.mdl-js-textfield ^:attrs attrs contents])
 

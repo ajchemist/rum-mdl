@@ -4,6 +4,33 @@
    [rum.mdl  :as mdl]
    [rum.mdl.demo :as demo]))
 
+(defonce *form (atom {:signup/username ""}))
+
+(rum/defc view-form-data < rum/reactive [ref]
+  [:p (pr-str (rum/react ref))])
+
+(rum/defc ^:deprecated reactive-textfield-input < rum/reactive [ref]
+  (mdl/textfield-input
+   {:id "username"
+    :type "text"
+    :value (:signup/username (rum/react ref))
+    :on-change #(swap! ref assoc :signup/username (.. % -target -value))}))
+
+(rum/defc reactive-textfield < rum/reactive [ref]
+  (mdl/textfield
+   {:class "signup-form__username" :mdl [:floating-label]}
+   (rum/with-key
+     (mdl/textfield-input
+      {:id "username"
+       :type "text"
+       :value (:signup/username (rum/react ref))
+       :on-change #(swap! ref assoc :signup/username (.. % -target -value))})
+     "my-controlled-input")
+   #_(reactive-textfield-input ref)
+   (mdl/textfield-label
+    {:for "username"}
+    "Choose your username")))
+
 (rum/defc examples
   []
   (demo/section
@@ -22,10 +49,12 @@
       "Numeric"]})
    (demo/snippet
     {:components
-     [(mdl/textfield {:mdl [:floating-label]}
+     [(mdl/textfield
+       {:mdl [:floating-label]}
        (mdl/textfield-input {:type "text" :id "sample3"})
        (mdl/textfield-label {:for "sample3"} "Text..."))
-      (mdl/textfield {:mdl [:floating-label]}
+      (mdl/textfield
+       {:mdl [:floating-label]}
        (mdl/textfield-input {:type "text" :id "sample4" :pattern "-?[0-9]*(\\.[0-9]+)?"})
        (mdl/textfield-label {:for "sample4"} "Number...")
        (mdl/textfield-error {:for "sample4"} "Input is not a number!"))]
@@ -45,4 +74,10 @@
         (mdl/textfield-label {:for "sample-expandable"} "Expandable Input")))]
      :captions
      ["Multiple line"
-      "Expanding"]})))
+      "Expanding"]})
+   (demo/snippet
+    {:components
+     [(view-form-data *form)
+      (reactive-textfield *form)]
+     :captions
+     ["" ""]})))
