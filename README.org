@@ -16,8 +16,8 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: dependencies
 #+begin_src clojure
-  [rum "0.10.2"]
-  [rum-mdl "0.1.0"]
+  [rum "0.10.4"]
+  [rum-mdl "0.1.1"]
 #+end_src
 
 #+NAME: require
@@ -68,6 +68,13 @@ and add a =<link>= tag in your =index.html=.
 - Documentation
   - introduction
   - rich code section in the [[https://ajchemist.github.io/rum-mdl][example]] pages
+
+** Changes
+
+*** 0.1.1
+
+- Respect existing key of react components. [[https://github.com/aJchemist/rum-mdl/issues/1][#1]]
+- =:should-update= of mixin =mdl-type= now compares =:rum.mdl/orig-args= not =:rum/args=.
 
 ** License
 
