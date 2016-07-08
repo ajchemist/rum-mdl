@@ -79,4 +79,9 @@
 (comment
   #?(:cljs (rum/mount (rum.mdl.examples.buttons/examples)
                       (el "mount")))
+
+  (rum/mount (mdl/button {:mdl [:fab :colored]} (mdl/icon "add"))
+             (el "mount"))
+  (rum/mount (mdl/button {:mdl [:fab :ripple]} (mdl/icon "add"))
+             (el "mount"))
   )

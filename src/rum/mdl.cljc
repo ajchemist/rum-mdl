@@ -162,14 +162,18 @@
        (dissoc :mdl)))))
 
 (defn mdl-type [typekey contents?]
-  {:did-remount
+  {:should-update
+   (fn [old new] (not= (::orig-args old) (::orig-args new)))
+   :did-remount
    (fn [_ {args :rum/args :as new}]
      (let [[attrs contents] (attrs-contents args)
            attrs    (mdl-attrs attrs typekey)
            contents (if contents?
                       (contents-with-key contents typekey)
                       contents)]
-       (assoc new :rum/args [attrs contents])))
+       (assoc new
+         :rum/args [attrs contents]
+         ::orig-args args)))
    :will-mount
    (fn [{args :rum/args :as state}]
      ;; core/type of rum/args is cljs.core/IndexedSeq
@@ -182,7 +186,8 @@
        #_(println (map core/type contents))
        (assoc state
          :rum/args [attrs contents]
-         :mdl/type (mdl-component typekey))))})
+         :mdl/type (mdl-component typekey)
+         ::orig-args args)))})
 
 #?(:clj
    (defmacro defmdlc
@@ -248,23 +253,23 @@
 
 ;;; badges
 
-(defmdlc badge :badge rum/static
+(defmdlc badge :badge
   [attrs [content]]
   [:span.mdl-badge ^:attrs attrs content])
 
 ;;; buttons
 
-(defmdlc button :button component-handler rum/static
+(defmdlc button :button component-handler
   [attrs [content]]
   [:button.mdl-button.mdl-js-button ^:attrs attrs content])
 
-(defmdlc label-button :button component-handler rum/static
+(defmdlc label-button :button component-handler
   [attrs [content]]
   [:label.mdl-button.mdl-js-button ^:attrs attrs content])
 
 ;;; cards
 
-(defmdlc card :card rum/static
+(defmdlc card :card
   [attrs ^:contents contents]
   [:.mdl-card ^:attrs attrs contents])
 
@@ -316,7 +321,7 @@
          (. node (close))))))
 
 (defmdlc ^{:arglists '([{:keys [title content actions full-width]}])}
-  dialog :dialog component-handler rum/static
+  dialog :dialog component-handler
   [{:keys [title content actions full-width] :as attrs}]
   [:dialog.mdl-dialog ^:attrs
    (dissoc attrs :title :content)
@@ -329,7 +334,7 @@
 
 ;;; layout
 
-(defmdlc layout :layout component-handler rum/static
+(defmdlc layout :layout component-handler
   [attrs ^:contents contents]
   [:.mdl-layout.mdl-js-layout ^:attrs attrs contents])
 
@@ -337,12 +342,12 @@
 
 (defn layout-title [title] [:.mdl-layout-title title])
 
-(defmdlc header :header rum/static
+(defmdlc header :header
   [attrs ^:contents contents]
   [:header.mdl-layout__header ^:attrs attrs
    [:.mdl-layout__header-row contents]])
 
-(defmdlc nav :nav rum/static
+(defmdlc nav :nav
   [attrs ^:contents contents]
   [:nav.mdl-navigation ^:attrs attrs contents])
 
@@ -355,15 +360,15 @@
 (defmdlc main-content :layout [attrs ^:contents contents]
   [:main.mdl-layout__content ^:attrs attrs contents])
 
-(defmdlc grid :grid rum/static
+(defmdlc grid :grid
   [attrs ^:contents contents]
   [:.mdl-grid ^:attrs attrs contents])
 
-(defmdlc cell :cell rum/static
+(defmdlc cell :cell
   [attrs ^:contents contents]
   [:.mdl-cell ^:attrs attrs contents])
 
-(defmdlc mini-footer :footer rum/static
+(defmdlc mini-footer :footer
   [attrs ^:contents contents]
   [:footer.mdl-mini-footer attrs contents])
 
@@ -383,7 +388,7 @@
 
 ;;; lists
 
-(defmdlc list :list component-handler rum/static
+(defmdlc list :list component-handler
   [attrs ^:contents contents]
   [:ul.mdl-list ^:attrs attrs contents])
 
@@ -433,19 +438,21 @@
             (.. m (setBuffer buffer))))
         state)}))
 
-(defmdlc progress :progress component-handler progress-mixin rum/static
+(defmdlc progress :progress component-handler progress-mixin
   [attrs]
-  [:.mdl-progress.mdl-js-progress ^:attrs attrs])
+  [:.mdl-progress.mdl-js-progress ^:attrs (dissoc attrs :progress :buffer)])
 
-(defmdlc spinner :spinner component-handler rum/static
+(defmdlc spinner :spinner component-handler
   [attrs]
   [:.mdl-spinner.mdl-js-spinner ^:attrs
    (let [{:keys [is-active]} attrs]
-     (update attrs :class classname {:is-active is-active}))])
+     (-> attrs
+       (update :class classname {:is-active is-active})
+       (dissoc :is-active)))])
 
 ;;; menus
 
-(defmdlc menu :menu component-handler rum/static
+(defmdlc menu :menu component-handler
   [attrs ^:contents contents]
   [:ul.mdl-menu.mdl-js-menu ^:attrs attrs contents])
 
@@ -454,7 +461,7 @@
 
 ;;; sliders
 
-(defmdlc slider :slider component-handler rum/static
+(defmdlc slider :slider component-handler
   [attrs]
   [:input.mdl-slider.mdl-js-slider ^:attrs
    (-> {:type "range"
@@ -464,7 +471,7 @@
 
 ;;; snackbar
 
-(defmdlc snackbar :snackbar component-handler rum/static
+(defmdlc snackbar :snackbar component-handler
   [{:keys [action] :as attrs}]
   [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
@@ -505,7 +512,7 @@
               (listen-component-downgraded node #(downgrade-elements ripple)))))
         state)}))
 
-(defmdlc checkbox :checkbox component-handler toggle rum/static
+(defmdlc checkbox :checkbox component-handler toggle
   [{:keys [input label for] :as attrs}]
   [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
    (dissoc attrs :input :label)
@@ -514,7 +521,7 @@
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
-(defmdlc radio :radio component-handler toggle rum/static
+(defmdlc radio :radio component-handler toggle
   [{:keys [input label for] :as attrs}]
   [:label.mdl-radio.mdl-js-radio ^:attrs
    (dissoc attrs :input :label)
@@ -523,7 +530,7 @@
       (merge input))]
    [:span.mdl-radio__label label]])
 
-(defmdlc icon-toggle :icon-toggle component-handler toggle rum/static
+(defmdlc icon-toggle :icon-toggle component-handler toggle
   [{:keys [input label for] :as attrs}]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
    (dissoc attrs :input :label)
@@ -532,7 +539,7 @@
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
-(defmdlc switch :switch component-handler toggle rum/static
+(defmdlc switch :switch component-handler toggle
   [{:keys [input for] :as attrs}]
   [:label.mdl-switch.mdl-js-switch ^:attrs
    (dissoc attrs :input)
@@ -543,7 +550,7 @@
 
 ;;; tables
 
-(defmdlc table :table component-handler rum/static
+(defmdlc table :table component-handler
   [attrs ^:contents contents]
   [:table.mdl-data-table.mdl-js-data-table ^:attrs attrs contents])
 
@@ -552,10 +559,10 @@
    (thead nil heads))
   ([vattrs heads]
    [:thead
-    (let [idx-attrs (->> vattrs
-                      (into {} (comp
-                                (map-indexed #(vector %1 %2))
-                                (remove #(nil? (second %))))))]
+    (let [idx-attrs (into {} (comp
+                              (map-indexed #(vector %1 %2))
+                              (remove #(nil? (second %))))
+                          vattrs)]
       (apply vector :tr
              (map #(if-let [attrs (idx-attrs %1)]
                      [:th ^:attrs (mdl-attrs attrs :table) %2]
@@ -568,10 +575,10 @@
   ([vattrs data]
    [:tbody
     (contents-with-key
-     (let [idx-attrs (->> vattrs
-                       (into {} (comp
-                                 (map-indexed #(vector %1 %2))
-                                 (remove #(nil? (second %))))))]
+     (let [idx-attrs (into {} (comp
+                               (map-indexed #(vector %1 %2))
+                               (remove #(nil? (second %))))
+                           vattrs)]
        (for [row data]
          (apply vector :tr
                 (map #(if-let [attrs (idx-attrs %1)]
@@ -602,6 +609,6 @@
 
 ;;; tooltips
 
-(defmdlc tooltip :tooltip component-handler rum/static
+(defmdlc tooltip :tooltip component-handler
   [attrs [content]]
   [:.mdl-tooltip ^:attrs attrs content])

@@ -19,6 +19,7 @@
 (rum/defc reactive-textfield < rum/reactive [ref]
   (mdl/textfield
    {:class "signup-form__username" :mdl [:floating-label]}
+   #_(reactive-textfield-input ref)
    (rum/with-key
      (mdl/textfield-input
       {:id "username"
@@ -26,10 +27,7 @@
        :value (:signup/username (rum/react ref))
        :on-change #(swap! ref assoc :signup/username (.. % -target -value))})
      "my-controlled-input")
-   #_(reactive-textfield-input ref)
-   (mdl/textfield-label
-    {:for "username"}
-    "Choose your username")))
+   (mdl/textfield-label {:for "username"} "Choose your username")))
 
 (rum/defc examples
   []
