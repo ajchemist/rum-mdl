@@ -20,13 +20,11 @@
   (mdl/textfield
    {:class "signup-form__username" :mdl [:floating-label]}
    #_(reactive-textfield-input ref)
-   (rum/with-key
-     (mdl/textfield-input
-      {:id "username"
-       :type "text"
-       :value (:signup/username (rum/react ref))
-       :on-change #(swap! ref assoc :signup/username (.. % -target -value))})
-     "my-controlled-input")
+   (mdl/textfield-input
+    {:id "username"
+     :type "text"
+     :value (:signup/username (rum/react ref))
+     :on-change #(swap! ref assoc :signup/username (.. % -target -value))})
    (mdl/textfield-label {:for "username"} "Choose your username")))
 
 (rum/defc examples
