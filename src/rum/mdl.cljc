@@ -329,7 +329,7 @@
   dialog :dialog component-handler
   [{:keys [title content actions full-width] :as attrs}]
   [:dialog.mdl-dialog ^:attrs
-   (dissoc attrs :title :content)
+   (dissoc attrs :title :content :actions)
    [:h4.mdl-dialog__title title]
    [:.mdl-dialog__content [:p content]]
    [:.mdl-dialog__actions
