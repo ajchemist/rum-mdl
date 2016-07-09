@@ -11,6 +11,8 @@
       :cljs
       [cljsjs.material])))
 
+(def oget aget)
+
 (def mdl-component
   "<typekey, component-name>"
   {:button      "MaterialButton"
@@ -140,11 +142,11 @@
         (cond
           (vector? e)
           (if (map? (get e 1))
-            (assoc-in e [1 :key] key)
+            (update-in e [1 :key] #(or % key))
             (apply vector (first e) {:key key} (rest e)))
           (string? e)
           [:span {:key key} e]
-          :else (if (aget e "key") e (rum/with-key e key)))))))
+          :else (if (oget e "key") e (rum/with-key e key)))))))
 
 (defn node
   "a dom element node of rum-mdl component"
@@ -297,7 +299,7 @@
 #?(:cljs
    (defn- dialog?
      [node]
-     (or (aget node "showModal")
+     (or (oget node "showModal")
          (when (exists? js/dialogPolyfill)
            (js/dialogPolyfill.registerDialog node)
            true))))
@@ -421,7 +423,7 @@
         (let [{[{:keys [progress buffer]}] :rum/args
                node :mdl/node
                type :mdl/type} new 
-              m (aget node type)]
+              m (oget node type)]
           (when progress
             (.. m (setProgress progress)))
           (when buffer
@@ -431,7 +433,7 @@
       (fn [state]
         (let [{[{:keys [progress buffer]}] :rum/args
                node :mdl/node type :mdl/type} state
-              m (aget node type)]
+              m (oget node type)]
           (when progress
             (.. m (setProgress progress)))
           (when buffer
@@ -483,7 +485,7 @@
      [component data]
      (let [{node :mdl/node type :mdl/type} @(rum/state component)]
        (-> node
-         (aget type)
+         (oget type)
          (.showSnackbar data)))))
 
 ;;; toggles
@@ -496,7 +498,7 @@
         (let [{[{:keys [checked disabled]}] :rum/args
                this :rum/react-component
                node :mdl/node type :mdl/type} state
-              m (aget node type)]
+              m (oget node type)]
           (when disabled                ; (. m (enable))
             (. m (disable)))
           (case type
@@ -505,7 +507,7 @@
               (. m (on)))
             (when checked               ; (. m (uncheck))
               (. m (check))))
-          (let [selector (str "." (aget m "CssClasses_" "RIPPLE_CONTAINER"))
+          (let [selector (str "." (oget m "CssClasses_" "RIPPLE_CONTAINER"))
                 ripple   (.querySelector node selector)] ; could be ".mdl-js-ripple-effect"
             (when ripple
               (upgrade-element ripple)
