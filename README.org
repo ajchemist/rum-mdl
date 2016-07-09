@@ -59,7 +59,7 @@ and add a =<link>= tag in your =index.html=.
 
 - Full wrapping mdl components
 
-  Here is the list of components which are not wrapped yet.
+  Here is the list of components which are not fully wrapped yet.
 
   - cards
   - tabs
