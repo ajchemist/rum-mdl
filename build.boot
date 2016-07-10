@@ -3,7 +3,7 @@
 (set-env!
  :source-paths #{"src" "examples"}
  :dependencies
- '[[ajchemist/classname "0.2.1"]
+ '[[ajchemist/classname "0.2.2"]
    [cljsjs/material "1.1.3-1"]
 
    [org.clojure/clojure "1.8.0" :scope "provided"]
