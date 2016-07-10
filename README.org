@@ -71,6 +71,10 @@ and add a =<link>= tag in your =index.html=.
 
 ** Changes
 
+*** 0.1.2
+
+- Generate a content react key based on a content position.
+
 *** 0.1.1
 
 - Respect existing key of react components. [[https://github.com/aJchemist/rum-mdl/issues/1][#1]]
