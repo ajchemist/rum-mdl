@@ -330,7 +330,7 @@
 
 (defmdlc ^{:arglists '([{:keys [title content actions full-width]}])}
   dialog :dialog component-handler
-  [{:keys [title content actions full-width] :as attrs}]
+  [{:keys [title content actions full-width] :as attrs} _]
   [:dialog.mdl-dialog ^:attrs
    (dissoc attrs :title :content :actions)
    [:h4.mdl-dialog__title title]
@@ -470,7 +470,7 @@
 ;;; sliders
 
 (defmdlc slider :slider component-handler
-  [attrs]
+  [attrs _]
   [:input.mdl-slider.mdl-js-slider ^:attrs
    (-> {:type "range"
         :on-change (fn [_])
@@ -480,7 +480,7 @@
 ;;; snackbar
 
 (defmdlc snackbar :snackbar component-handler
-  [{:keys [action] :as attrs}]
+  [{:keys [action] :as attrs} _]
   [:.mdl-snackbar.mdl-js-snackbar ^:attrs attrs
    [:.mdl-snackbar__text]
    [:button.mdl-snackbar__action (merge {:type "button"} action)]])
@@ -524,7 +524,7 @@
      ))
 
 (defmdlc checkbox :checkbox component-handler toggle
-  [{:keys [input label for] :as attrs}]
+  [{:keys [input label for] :as attrs} _]
   [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
    (dissoc attrs :input :label)
    [:input.mdl-checkbox__input ^:attrs
@@ -533,7 +533,7 @@
    [:span.mdl-checkbox__label label]])
 
 (defmdlc radio :radio component-handler toggle
-  [{:keys [input label for] :as attrs}]
+  [{:keys [input label for] :as attrs} _]
   [:label.mdl-radio.mdl-js-radio ^:attrs
    (dissoc attrs :input :label)
    [:input.mdl-radio__button ^:attrs
@@ -542,7 +542,7 @@
    [:span.mdl-radio__label label]])
 
 (defmdlc icon-toggle :icon-toggle component-handler toggle
-  [{:keys [input label for] :as attrs}]
+  [{:keys [input label for] :as attrs} _]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
    (dissoc attrs :input :label)
    [:input.mdl-icon-toggle__input ^:attrs
@@ -551,7 +551,7 @@
    [:i.material-icons.mdl-icon-toggle__label label]])
 
 (defmdlc switch :switch component-handler toggle
-  [{:keys [input for] :as attrs}]
+  [{:keys [input for] :as attrs} _]
   [:label.mdl-switch.mdl-js-switch ^:attrs
    (dissoc attrs :input)
    [:input.mdl-switch__input ^:attrs
