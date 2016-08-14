@@ -3,7 +3,7 @@
 (set-env!
  :source-paths #{"src" "examples"}
  :dependencies
- '[[ajchemist/classname "0.2.2"]
+ '[[ajchemist/classname "0.2.3"]
    [cljsjs/material "1.1.3-1"]
 
    [org.clojure/clojure "1.8.0" :scope "provided"]
@@ -71,7 +71,7 @@
    :simple-prod simple-prod-opts
    :advanced    advanced-opts})
 
-(def +version+ "0.1.3")
+(def +version+ "0.1.3-1")
 
 (task-options!
  pom {:project 'rum-mdl
