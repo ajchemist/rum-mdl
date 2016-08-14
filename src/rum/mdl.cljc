@@ -193,6 +193,11 @@
          :mdl/type (mdl-component typekey)
          ::orig-args args)))})
 
+(defn- defmdlc-binding [binding]
+  (-> binding
+    (update 0 #(or % '_))
+    (update 1 #(or % '_))))
+
 #?(:clj
    (defmacro defmdlc
      "binding must be a vector literal"
@@ -207,7 +212,7 @@
            docstring (if docstring docstring "")
            mixin     (remove #(or (keyword? %) (string? %)) ys)
            xs        (drop-while (complement vector?) xs)
-           binding   (first xs)
+           binding   (defmdlc-binding (first xs))
            contents? (->> binding (map meta) (map :contents) (some boolean))
            body      (rest xs)]
        `(rum/defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
