@@ -8,7 +8,7 @@
 
    [org.clojure/clojure "1.8.0" :scope "provided"]
    [org.clojure/clojurescript "1.9.93" :scope "provided"]
-   [rum "0.10.4" :scope "provided"]
+   [rum "0.10.5" :scope "provided"]
    [garden "1.3.2" :scope "test"]
    [binaryage/devtools "0.7.2" :scope "test"]
    [ajchemist/boot-figwheel "0.5.4-5" :scope "test"]
@@ -71,7 +71,7 @@
    :simple-prod simple-prod-opts
    :advanced    advanced-opts})
 
-(def +version+ "0.1.2")
+(def +version+ "0.1.3")
 
 (task-options!
  pom {:project 'rum-mdl
