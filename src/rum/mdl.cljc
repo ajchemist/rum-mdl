@@ -237,7 +237,9 @@
 
 (def component-handler
   "only for `mdl-js-*' classed component"
-  #?(:cljs
+  #?(
+     :clj {}
+     :cljs
      {:did-mount
       (fn [state]
         (let [this (:rum/react-component state)
@@ -249,7 +251,8 @@
         (let [this (:rum/react-component state)
               node (js/ReactDOM.findDOMNode this)]
           (downgrade-elements node)
-          (dissoc state :mdl/node)))}))
+          (dissoc state :mdl/node)))}
+     ))
 
 (defn icon
   ([font] (icon nil font))
@@ -495,7 +498,9 @@
 
 (def toggle
   "workaround mixin for toggle"
-  #?(:cljs
+  #?(
+     :clj {}
+     :cljs
      {:did-mount
       (fn [state]
         (let [{[{:keys [checked disabled]}] :rum/args
@@ -515,7 +520,8 @@
             (when ripple
               (upgrade-element ripple)
               (listen-component-downgraded node #(downgrade-elements ripple)))))
-        state)}))
+        state)}
+     ))
 
 (defmdlc checkbox :checkbox component-handler toggle
   [{:keys [input label for] :as attrs}]
