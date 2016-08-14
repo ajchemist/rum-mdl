@@ -1,10 +1,9 @@
 (ns rum.mdl
   (:refer-clojure :exclude [list])
-  #?(:cljs (:require-macros [rum.mdl :refer [defmdlc]]))
+  #?(:cljs
+     (:require-macros [rum.mdl :refer [defmdlc]]))
   (:require
-   [#?(:clj clojure.core :cljs cljs.core) :as core]
-   [rum.core :as rum #?@(:clj  [:refer [defc defcc defcs]]
-                         :cljs [:refer-macros [defc defcc defcs]])]
+   [rum.core :as rum]
    [classname.core :refer [classname]]
    #?(:clj
       [sablono.compiler :as s]
@@ -182,13 +181,13 @@
    :will-mount
    (fn [{args :rum/args :as state}]
      ;; core/type of rum/args is cljs.core/IndexedSeq
-     ;; args: [attr? content*]
+     ;; args: [attrs? contents*]
      (let [[attrs contents] (attrs-contents args)
            attrs    (mdl-attrs attrs typekey)
            contents (if contents?
                       (contents-with-key contents typekey)
                       contents)]
-       #_(println (map core/type contents))
+       #_(prn (map core/type contents))
        (assoc state
          :rum/args [attrs contents]
          :mdl/type (mdl-component typekey)
@@ -211,9 +210,10 @@
            binding   (first xs)
            contents? (->> binding (map meta) (map :contents) (some boolean))
            body      (rest xs)]
-       `(defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
+       `(rum/defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
           ~'< (mdl-type ~typekey ~contents?) ~@mixin
-          ~binding ~@body))))
+          ~binding
+          ~@body))))
 
 #?(:cljs
    (defn upgrade-element [el]
