@@ -565,7 +565,7 @@
         state)}
      ))
 
-(defmdlc checkbox :checkbox component-handler toggle
+(defmdlc checkbox :checkbox component-handler toggle {:key-fn (fn [{for :for}] (str for))}
   [{:keys [input label for] :as attrs}]
   [:label.mdl-checkbox.mdl-js-checkbox ^:attrs
    (dissoc attrs :input :label)
@@ -574,16 +574,16 @@
       (merge input))]
    [:span.mdl-checkbox__label label]])
 
-(defmdlc radio :radio component-handler toggle
+(defmdlc radio :radio component-handler toggle {:key-fn (fn [{for :for}] (str for))}
   [{:keys [input label for] :as attrs}]
   [:label.mdl-radio.mdl-js-radio ^:attrs
-   (dissoc attrs :input :label)
+   (-> attrs (dissoc :input :label))
    [:input.mdl-radio__button ^:attrs
     (-> {:type "radio" :id for}
       (merge input))]
    [:span.mdl-radio__label label]])
 
-(defmdlc icon-toggle :icon-toggle component-handler toggle
+(defmdlc icon-toggle :icon-toggle component-handler toggle {:key-fn (fn [{for :for}] (str for))}
   [{:keys [input label for] :as attrs}]
   [:label.mdl-icon-toggle.mdl-js-icon-toggle ^:attrs
    (dissoc attrs :input :label)
@@ -592,7 +592,7 @@
       (merge input))]
    [:i.material-icons.mdl-icon-toggle__label label]])
 
-(defmdlc switch :switch component-handler toggle
+(defmdlc switch :switch component-handler toggle {:key-fn (fn [{for :for}] (str for))}
   [{:keys [input for] :as attrs}]
   [:label.mdl-switch.mdl-js-switch ^:attrs
    (dissoc attrs :input)
