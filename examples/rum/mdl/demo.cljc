@@ -1,54 +1,76 @@
 (ns rum.mdl.demo
-  #?(:cljs (:require-macros rum.mdl.demo))
+  #?(:cljs
+     (:require-macros
+      [rum.mdl.demo]))
   (:require
-   #?(:clj [sablono.compiler :as s])
+   #?@(:clj [[sablono.compiler :as s]
+             [garden.core]])
    [clojure.string :as string]
    [rum.core :as rum]
    [rum.mdl  :as mdl]))
 
-(declare syntaxify)
+(declare syntaxify snippet-demos snippet-captions snippet-code)
 
 (defn intro
-  ([title]
-   [:.intro [:h3 title]])
-  ([title text]
-   [:.intro [:h3 title] [:p text]]))
+  ([title     ] [:.docs-text-styling.component-title [:h3 title]])
+  ([title text] [:.docs-text-styling.component-title [:h3 title] [:p text]]))
+
+(rum/defc section [& contents]
+  (mdl/grid
+   {:class ["is-active" "mdl-components__page"]
+    :mdl   [:color-text--grey-600]}
+   (apply mdl/cell {:mdl [:12]} contents)))
+
+(defn snippet-group
+  [{:keys [demos captions sources]}]
+  [:.snippet-group
+   nil
+   [:.snippet-header
+    (snippet-demos demos)
+    (snippet-captions captions)]
+   (when (seq sources)
+     (snippet-code sources))])
+
+(defn snippet-code [sources]
+  [:.snippet-code
+   (apply vector :pre.language-markup (map syntaxify sources))])
 
 (defn snippet-demos [demos]
-  (conj
-   (reduce conj [:.demos [:.padding]]
-           (for [demo demos]
-             [:.demo demo]))
-   [:.padding]))
+  (into
+   [:.snippet-demos]
+   (concat
+    [[:.snippet-demo-padding]]
+    (map #(vector :.snippet-demo %) demos)
+    [[:.snippet-demo-padding]])))
 
 (defn snippet-captions [captions]
-  (conj
-   (reduce conj [:.captions [:.padding]]
-           (for [caption captions]
-             [:.caption caption]))
-   [:.padding]))
+  (into
+   [:.snippet-captions]
+   (concat
+    [[:.snippet-caption-padding]]
+    (map #(vector :.snippet-caption %) captions)
+    [[:.snippet-caption-padding]])))
 
-(rum/defc snippet
-  [{:keys [sources components captions]}]
-  [:.snippet
-   [:.header
-    (snippet-demos components)
-    (snippet-captions captions)]
-   (reduce conj [:source] sources)])
+#?(:clj
+   (defmacro style [rules]
+     `[:style
+       ~(garden.core/css rules)]))
 
 #?(:clj
    (defmacro oneliner [& xs]
-     (let [xs   (partition 2 xs)
-           code (map first xs)
+     (let [xs       (partition 2 xs)
+           codes    (map first xs)
            captions (map second xs)
-           sources (->> code
-                     (map pr-str)
-                     (map syntaxify))]
-       `[:.snippet
-         [:.header
-          ~(snippet-demos code)
+           sources  (->> codes
+                      (map pr-str)
+                      (map syntaxify))]
+       `[:.snippet-group
+         [:.snippet-header
+          ~(snippet-demos codes)
           ~(snippet-captions captions)]
-         [:.source ~@sources]])))
+         [:.snippet-code
+          [:pre.language-markup
+           ~@sources]]])))
 
 #?(:clj
    (defmacro oneliner* [& xs]
@@ -64,25 +86,21 @@
                (if (empty? xs)
                  ret
                  (recur xs ret))))
-           code (map #(if (< (count %) 2)
-                        (first %)
-                        (reduce conj [:div] %)) sexps)
+           codes (map #(if (< (count %) 2)
+                         (first %)
+                         (reduce conj [:div] %)) sexps)
            sources (for [sexp sexps]
                      (->> sexp
                        (map pr-str)
                        (string/join "\n")
                        (syntaxify)))]
-       `[:.snippet
-         [:.header
-          ~(snippet-demos code)
+       `[:.snippet-group
+         [:.snippet-header
+          ~(snippet-demos codes)
           ~(snippet-captions captions)]
-         [:.source ~@sources]])))
-
-(rum/defc section [& contents]
-  (mdl/grid
-   {:class ["demo" "example"]
-    :mdl   [:color-text--grey-600]}
-   (apply mdl/cell {:mdl [:12]} contents)))
+         [:.snippet-code
+          [:pre.language-markup
+           ~@sources]]])))
 
 ;;; syntax highlight
 ;; https://github.com/reagent-project/reagent/blob/master/demo/reagentdemo/syntax.cljs
@@ -137,9 +155,9 @@
                                          close-p meta-p iden-p any-p])
                      ")"))))
 
-(def keyw-re #"^:")
+(def keyw-re   #"^:")
 (def qualif-re #"^[a-z]+/")
-(def def-re #"^def|^ns\b")
+(def def-re    #"^def|^ns\b")
 
 (defn tokenize [src]
   (for [[s comment strlitt open close met iden any]
@@ -185,15 +203,16 @@
                        (conj (pop res) (str old val))
                        (conj res val)))
                    (conj res [:span style val])))
-          (into [:pre] res))))))
+          (into [:code] res))))))
 
 (comment
+
   (snippet
    (mdl/button {:mdl [:fab :colored]} (mdl/icon "add"))
    "Colored FAB"
    (mdl/button {:mdl [:fab :colored :ripple]} (mdl/icon "add"))
    "With ripple")
-  
+
   (syntaxify
    (str
     (pr-str

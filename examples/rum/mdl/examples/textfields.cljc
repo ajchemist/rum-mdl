@@ -31,8 +31,8 @@
   []
   (demo/section
    (demo/intro "Text Fields")
-   (demo/snippet
-    {:components
+   (demo/snippet-group
+    {:demos
      [(mdl/textfield
        (mdl/textfield-input {:type "text" :id "sample1"})
        (mdl/textfield-label {:for "sample1"} "Text..."))
@@ -43,8 +43,8 @@
      :captions
      ["Text"
       "Numeric"]})
-   (demo/snippet
-    {:components
+   (demo/snippet-group
+    {:demos
      [(mdl/textfield
        {:mdl [:floating-label]}
        (mdl/textfield-input {:type "text" :id "sample3"})
@@ -57,8 +57,8 @@
      :captions
      ["Text with floating label"
       "Numeric with floating label"]})
-   (demo/snippet
-    {:components
+   (demo/snippet-group
+    {:demos
      [(mdl/textfield
        (mdl/textfield-textarea {:type "text" :id "sample5"})
        (mdl/textfield-label {:for "sample5"} "Text lines..."))
@@ -71,8 +71,8 @@
      :captions
      ["Multiple line"
       "Expanding"]})
-   (demo/snippet
-    {:components
+   (demo/snippet-group
+    {:demos
      [(view-form-data *form)
       (reactive-textfield *form)]
      :captions

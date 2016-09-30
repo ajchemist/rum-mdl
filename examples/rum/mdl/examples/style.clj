@@ -33,25 +33,19 @@
    {:cursor "pointer"}]
   [:.mdl-navigation__link
    [:.material-icons
-    {:margin {:right "0.649ex"}}]]
-  [:main.mdl-layout__content
-   {:margin 0
-    :overflow :visible}
-   [:#content
-    [:>
-     [:.mdl-cell
-      {:display :flex}]]]])
+    {:margin {:right "0.649ex"}}]])
 
 (defstylesfn components-nav []
   [:aside.components-nav
-   (-> {:display "inline-block"
-        :background "#fff"
-        :width "200px"
-        :box-sizing "border-box"
-        :padding "24px 0"
-        :flex-shrink "0"
-        :z-index "1"}
-     (merge (box-shadow)))
+   (merge
+    {:display "inline-block"
+     :background "#fff"
+     :width "200px"
+     :box-sizing "border-box"
+     :padding "24px 0"
+     :flex-shrink "0"
+     :z-index "1"}
+    (box-shadow))
    [:a
     {:margin "16px"
      :font-weight "400"
@@ -72,7 +66,41 @@
       :background-repeat "no-repeat"
       :background-size "auto 48px"
       :border-radius "50%"
-      :height "46px" :width "46px"}]]])
+      :height "46px" :width "46px"}]
+    [:&.is-active
+     {:font-weight 700
+      :color "#c2185b"}]]
+   (at-media
+    {:screen true :max-width (px 850)}
+    [:&
+     {:position "fixed"
+      :top "64px"
+      :left "0"
+      :display "block"
+      :flex-wrap "nowrap"
+      :width "100%"
+      :height "120px"
+      :overflow-x "auto"
+      :overflow-y "hidden"
+      :padding "8px"
+      :z-index 100
+      :white-space "nowrap"}
+     [:a
+      {:display "inline-block"
+       :vertical-align "top"
+       :height "100%"
+       :width "auto"
+       :min-width "48px"
+       :margin "0 8px 0 0"
+       :padding-left "0"
+       :padding-top "10px"}
+      [:.link-image
+       {:position :static :width (px 48)}]
+      [:.label
+       {:display "block"
+        :width "auto"
+        :margin "0 auto"
+        :text-align "center"}]]])])
 
 (defstylesfn mount []
   [:#mount
@@ -84,6 +112,13 @@
     {:display "block"}]])
 
 (defstylesfn demo []
+  [:.mdl-components__page
+   [:.mdl-components-img
+    {:background [["url('https://getmdl.io/assets/compindex_2x.png')" "no-repeat" "top" "left/contain"]]}]]
+  [:.snippet-group
+   [:.snippet-code
+    #_{:padding {:top "1em" :bottom "1em"}}
+    #_[:pre {:margin {:left "40px !important" :right "40px !important"}}]]]
   [:.demo.example
    {:display "block"
     :position "relative"
@@ -111,11 +146,7 @@
       [:.demo {:padding "0 40px 40px" :display "table-cell" :text-align "center" :vertical-align "middle" :margin "0"}]]
      [:.captions {:background-color "#fff" :height "48px"}
       [:.padding {:text-align "center" :padding "0"}]
-      [:.caption {:font-size "13px" :padding "0 40px" :white-space "nowrap" :position "relative"}]]]
-    [:.source {:position "relative" :overflow "hidden"
-               :background " #f5f2f0"
-               :padding {:top "1em" :bottom "1em"}}
-     [:pre {:margin {:left "45px" :right "45px"}}]]]]
+      [:.caption {:font-size "13px" :padding "0 40px" :white-space "nowrap" :position "relative"}]]]]]
   [:.demo.example
    [:.mdl-textfield--expandable {:width "150px"}]
    [:.mdl-slider {:width "30vw" :max-width "260px"}]
@@ -123,17 +154,6 @@
     [" ~ "
      [:button {:width "175px"}]]]
    [:.mdl-list {:width "30vw" :min-width "260px"}]
-   [:.mdl-components-img
-    {:position "absolute"
-     :margin-top "24px"
-     :left "40px"
-     :height "90%"
-     :width "90%"
-     :max-height "600px"
-     :background [["url('https://getmdl.io/assets/compindex_2x.png')"
-                   "no-repeat"
-                   "top"
-                   "left/contain"]]}]
    [:.mdl-components__warning
     {:width "100%"
      :max-width "640px"
@@ -159,12 +179,13 @@
 (defstylesheetfn css []
   (layout)
   (components-nav)
-  (mount)
+  #_(mount)
   (demo))
 
 (comment
   (css {})
   (css {:vendors ["webkit"] :output-to "target/rum-mdl-examples.css"})
+  (css {:vendors ["webkit"] :output-to "docs/rum-mdl-examples.css"})
 
   (garden.core/css [:a (box-shadow)])
   (garden.core/css (heading {:a 1}))

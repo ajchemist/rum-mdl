@@ -15,7 +15,7 @@
          (js/clearInterval (aget js/window :interval))
          (reset! activated false)
          (reset! progress 0)))))
-  
+
 (rum/defc my-progress < rum/reactive []
   (mdl/progress {:progress (rum/react progress)}))
 
@@ -34,7 +34,6 @@
   []
   (demo/section
    (demo/intro "Loading")
-   
    (demo/oneliner
     (my-progress)
     "Example progress"

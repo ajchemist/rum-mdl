@@ -5,6 +5,7 @@
    [rum.mdl.examples.badges]
    [rum.mdl.examples.buttons]
    [rum.mdl.examples.cards]
+   [rum.mdl.examples.chips]
    [rum.mdl.examples.dialogs]
    [rum.mdl.examples.layout]
    [rum.mdl.examples.lists]
@@ -16,24 +17,33 @@
    [rum.mdl.examples.tables]
    [rum.mdl.examples.textfields]
    [rum.mdl.examples.tooltips]
-   [rum.mdl.demo :as demo]))
+   [rum.mdl.demo :as demo]
+   [classname.core :refer [classname]]))
 
 #?(:cljs (enable-console-print!))
 
-#?(:cljs
-   (defn el [id] (js/document.getElementById id)))
+(defn el [id] #?(:cljs (js/document.getElementById id)))
 
-(defn link [ctor image-path label]
-  [:a {:on-click (fn [_] #?(:cljs (rum/mount (ctor) (el "mount"))))}
-   [:.link-image
+(defn mount [component]
+  (rum/mount component (el "mount"))
+  #_(rum/dom-node anchor-state))
+
+(rum/defc link
+  [ctor image-path label]
+  [:a.mdl-components__link.mdl-component
+   { ;; :class    (classname {:is-active active})
+    :on-click (fn [_] (mount (ctor)))
+    :style {:cursor "pointer"}}
+   [:.mdl-components__link-image
     {:style {:background-image (str "url(//getmdl.io" image-path ")")}}]
-   [:.label label]])
+   [:.mdl-components__link-text label]])
 
 (rum/defc aside-components-nav []
-  [:aside.components-nav
+  [:aside.mdl-components__nav.docs-text-styling.mdl-shadow--4dp
    (link #(rum.mdl.examples.badges/examples)     "/assets/comp_badges.png"     "Badges")
    (link #(rum.mdl.examples.buttons/examples)    "/assets/comp_buttons.png"    "Buttons")
    (link #(rum.mdl.examples.cards/examples)      "/assets/comp_cards.png"      "Cards")
+   (link #(rum.mdl.examples.chips/examples)      "/assets/comp_chips.png"      "Chips")
    (link #(rum.mdl.examples.dialogs/examples)    "/assets/comp_dialog.png"     "Dialogs")
    (link #(rum.mdl.examples.layout/examples)     "/assets/comp_layout.png"     "Layout")
    (link #(rum.mdl.examples.lists/examples)      "/assets/comp_lists.png"      "Lists")
@@ -47,26 +57,46 @@
    (link #(rum.mdl.examples.tooltips/examples)   "/assets/comp_tooltips.png"   "Tooltips")])
 
 (rum/defc front []
-  (demo/section [:.mdl-components-img]))
+  (mdl/grid
+   {:class ["is-active" "mdl-components-index" "mdl-components__page"]
+    :mdl   [:color-text--grey-600]}
+   (mdl/cell
+    {:mdl [:12]}
+    [:.mdl-components-img])))
 
 (rum/defc content []
   (mdl/grid
    {:mdl [:no-spacing]
-    :id  "content"}
+    :id  "content"
+    :class "content"}
+   [:link {:rel "stylesheet" :href "main.css"}]
+   [:link {:rel "stylesheet" :href "components.css"}]
    (mdl/cell
-    {:mdl [:12]}
+    {:mdl [:12]
+     :class "mdl-components"}
     (aside-components-nav)
-    [:#mount])))
+    [:main#mount.mdl-components__pages])))
 
 (rum/defc chrome []
   (mdl/layout
+   {:class "docs-layout"}
    (mdl/header
-    (mdl/layout-title "〈RUM〉-MDL")
-    (mdl/layout-spacer)
-    (mdl/nav
-     (mdl/link {:on-click (fn [_] #?(:cljs (rum/mount (front) (el "mount"))))} "Components")
-     (mdl/link {:href "http://github.com/aJchemist/rum-mdl"} (mdl/icon "link") "GitHub")))
-   (mdl/main-content {:id "main"} (content))))
+    {:class "docs-layout-header"}
+    (mdl/header-row)
+    [:.docs-navigation__container
+     (mdl/nav
+      {:class "docs-navigation"}
+      (mdl/link {:on-click (fn [_] #?(:cljs (mount (front))))
+                 :style {:font-size "16px"}} "〈RUM〉-MDL")
+      (mdl/layout-spacer)
+      (mdl/link {:on-click (fn [_] #?(:cljs (mount (front))))} "Components")
+      (mdl/link
+       {:href "http://github.com/aJchemist/rum-mdl"
+        :class "mdl-navigation__link--icon github"}
+       (mdl/icon "link") "GitHub"))])
+   (mdl/main-content
+    {:id "main" :class ["docs-layout-content" "mdl-color-text--grey-600"]}
+    (content))))
 
 (defn ^:export main [])
 

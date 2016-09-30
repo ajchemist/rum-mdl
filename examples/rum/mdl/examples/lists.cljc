@@ -20,15 +20,23 @@
      (mdl/li {:icon "person" :content "Rum"})
      (mdl/li {:icon "person" :content "Rum-MDL"}))
     "Icons")
-   (demo/snippet
-    {:components
+   (demo/snippet-group
+    {:demos
      [(mdl/list
        (for [x [1 2 3]]
          (mdl/li {:key (str "gen" x) :icon "person" :content (str x)})))]
      :captions
-     ["Iteration"]})
-   (demo/snippet
-    {:components
+     ["Iteration"]
+     :sources
+     [
+      "
+(mdl/list
+ (for [x [1 2 3]]
+   (mdl/li {:key (str \"gen\" x) :icon \"person\" :content (str x)})))
+"
+      ]})
+   (demo/snippet-group
+    {:demos
      [(mdl/list
        (mdl/li {:icon "person" :content "React"}
                {:action (badge/my-badge badge/counter)})
@@ -43,9 +51,28 @@
                {:action (mdl/switch {:mdl [:ripple] :for "switch-1" :checked true})}))]
      :captions
      ["Avatars and actions"
-      "Avatars and controls"]})
-   (demo/snippet
-    {:components
+      "Avatars and controls"]
+     :sources
+     [
+      "
+(mdl/list
+ (mdl/li {:icon \"person\" :content \"React\"}
+         {:action (badge/my-badge badge/counter)})
+ (mdl/li {:icon \"person\" :content \"Rum\"}
+         {:action (badge/my-badge badge/counter)})
+ (mdl/li {:icon \"person\" :content \"Rum-MDL\"}
+         {:action (badge/my-badge badge/counter)}))
+"
+      "
+(mdl/list
+ (mdl/li {:icon \"person\" :content \"Rum\"}
+         {:action (mdl/checkbox {:mdl [:ripple] :for \"checkbox-1\"})})
+ (mdl/li {:icon \"person\" :content \"Rum-MDL\"}
+         {:action (mdl/switch {:mdl [:ripple] :for \"switch-1\" :checked true})}))
+"
+      ]})
+   (demo/snippet-group
+    {:demos
      [(mdl/list
        (mdl/li {:mdl [:two]
                 :icon "person" :content "Rum"
@@ -55,12 +82,8 @@
                 :icon "person" :content "Rum-MDL"
                 :sub "MDL wrapper written with RUM"}
                {:action (mdl/switch {:mdl [:ripple] :for "switch-2" :checked true})
-                :info "Actor"}))]
-     :captions
-     ["Two line"]})
-   (demo/snippet
-    {:components
-     [(mdl/list
+                :info "Actor"}))
+      (mdl/list
        (mdl/li {:mdl [:three]
                 :icon "person" :content "Bryan Cranston"
                 :body "Bryan Cranston played the role of Walter in Breaking Bad. He is also known for playing Hal in Malcom in the Middle."}
@@ -74,4 +97,5 @@
                 :body "Bob Odinkrik played the role of Saul in Breaking Bad. Due to public fondness for the character, Bob stars in his own show now, called \"Better Call Saul\"."}
                {:action (mdl/icon "star")}))]
      :captions
-     ["Three line"]})))
+     ["Two line"
+      "Three line"]})))

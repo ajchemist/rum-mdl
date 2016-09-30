@@ -30,10 +30,7 @@
  '[adzerk.bootlaces :refer :all]
  '[boot.pod :as pod]
  '[clojure.java.io :as jio]
- '[pandeiro.boot-http :refer [serve]]
- '[ring.middleware file]
- '[ring.util.mime-type :as mime]
- '[ring.util.response :as response])
+ '[pandeiro.boot-http :refer [serve]])
 
 (refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl})
 
@@ -75,8 +72,6 @@
    :simple      simple-opts
    :simple-prod simple-prod-opts
    :advanced    advanced-opts})
-
-(def +version+ "0.1.3-1")
 
 (task-options!
  pom {:project 'rum-mdl
@@ -150,14 +145,20 @@
              [:link {:rel "stylesheet" :href "rum-mdl-examples.css"}]]
     :body   [((r rum/render-html) ((r examples/chrome)))]
     :root   :#examples
-    :script [(when-not dev [:script {:src "ga.js"}])
+    :script [(when-not dev [:script {:async true :src "ga.js"}])
              [:script {:src "rum-mdl-examples.js"}]
              [:script "window.onload=rum.mdl.examples.onload;"]])
    (sift :add-jar {'cljsjs/material #".*.css$"})
    (sift :move {#".*/material.min.inc.css" "material.min.inc.css"})
    (sift :invert true :include #{#"cljsjs"})
+   (sift :to-asset #{#"main.css" #"components.css"})
    (css :cssfn 'rum.mdl.examples.style/css
         :opts  {:pretty-print? false})))
+
+(require
+ '[ring.middleware file]
+ '[ring.util.mime-type :as mime]
+ '[ring.util.response :as response])
 
 (deftask make-ring-handler
   [r http-server-root ROOT str]
@@ -194,6 +195,7 @@
                     :figwheel {:build-id "dev"
                                :on-jsload 'rum.mdl.examples/main}}]
       :figwheel-options {:open-file-command "emacsclient"
+                         :css-dirs [target-path]
                          :ring-handler 'boot.user/ring-handler
                          :validate-config false
                          :server-port 8900}))))
