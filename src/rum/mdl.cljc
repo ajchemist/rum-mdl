@@ -15,21 +15,21 @@
 (def mdl-component
   "<typekey, component-name>"
   {:button      "MaterialButton"
-   :table       "MaterialDataTable"
+   :checkbox    "MaterialCheckbox"
+   :icon-toggle "MaterialIconToggle"
    :layout      "MaterialLayout"
    :layout-tab  "MaterialLayoutTab"
    :menu        "MaterialMenu"
    :progress    "MaterialProgress"
+   :radio       "MaterialRadio"
    :ripple      "MaterialRipple"
    :snackbar    "MaterialSnackbar"
    :spinner     "MaterialSpinner"
+   :switch      "MaterialSwitch"
+   :table       "MaterialDataTable"
    :tabs        "MaterialTabs"
    :textfield   "MaterialTextfield"
-   :tooltip     "MaterialTooltip"
-   :checkbox    "MaterialCheckbox"
-   :radio       "MaterialRadio"
-   :icon-toggle "MaterialIconToggle"
-   :switch      "MaterialSwitch"})
+   :tooltip     "MaterialTooltip"})
 
 (def mdl-required
   "<typekey, required-classname-map>"
@@ -156,14 +156,20 @@
   #?(:cljs (:mdl/node @(rum/state this))))
 
 (defn mdl-attrs
+  "General attribute wrapper for mdl classed element
+
+  Examples:
+
+  {:mdl [:color--teal :color-text--white]}
+  => {:class \"mdl-color--teal mdl-color-text--white\"}"
   ([attrs]
    (mdl-attrs attrs nil))
   ([{:keys [mdl] :as attrs} key]
-   (if (empty? mdl)
-     attrs
+   (if (seq mdl)
      (-> attrs
        (update :class classname (rename-kw mdl (mdl-optional key)))
-       (dissoc :mdl)))))
+       (dissoc :mdl))
+     attrs)))
 
 (defn mdl-type [typekey contents?]
   {:should-update
@@ -260,8 +266,8 @@
      ))
 
 (defn icon
-  ([font] (icon nil font))
-  ([attrs font] [:i.material-icons ^:attrs attrs font])
+  ([          font] [:i.material-icons nil font])
+  ([    attrs font] [:i.material-icons ^:attrs attrs font])
   ([tag attrs font] [tag ^:attrs (update attrs :class classname :material-icons) font]))
 
 ;;; badges
@@ -476,11 +482,13 @@
 
 (defmdlc slider :slider component-handler
   [attrs]
-  [:input.mdl-slider.mdl-js-slider ^:attrs
-   (-> {:type "range"
-        :on-change (fn [_])
-        :min "0" :max "100"}
-     (merge attrs))])
+  [:input.mdl-slider.mdl-js-slider
+   ^:attrs
+   (merge
+    {:type "range"
+     :on-change (fn [_])
+     :min "0" :max "100"}
+    attrs)])
 
 ;;; snackbar
 
@@ -512,19 +520,17 @@
                this :rum/react-component
                node :mdl/node type :mdl/type} state
               m (oget node type)]
-          (when disabled                ; (. m (enable))
-            (. m (disable)))
-          (case type
-            "MaterialSwitch"
-            (when checked               ; (. m (off))
-              (. m (on)))
-            (when checked               ; (. m (uncheck))
-              (. m (check))))
           (let [selector (str "." (oget m "CssClasses_" "RIPPLE_CONTAINER"))
                 ripple   (.querySelector node selector)] ; could be ".mdl-js-ripple-effect"
             (when ripple
               (upgrade-element ripple)
-              (listen-component-downgraded node #(downgrade-elements ripple)))))
+              (listen-component-downgraded node #(downgrade-elements ripple))))
+          (when disabled (. m (disable))) ; (. m (enable))
+          (when checked
+            (case type
+              "MaterialSwitch" (. m (on)) ; (. m (off))
+              (. m (check))               ; (. m (uncheck))
+              )))
         state)}
      ))
 
