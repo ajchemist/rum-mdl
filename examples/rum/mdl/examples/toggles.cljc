@@ -23,20 +23,6 @@
       :label "Checkbox"})
     "Check off")
    (demo/oneliner
-    (mdl/radio
-     {:mdl [:ripple]
-      :for "option-1"
-      :input {:id "option-1" :name "options" :value "1"}
-      :label "First"
-      :checked true})
-    "Radio on"
-    (mdl/radio
-     {:mdl [:ripple]
-      :for "option-2"
-      :input {:id "option-2" :name "options" :value "2"}
-      :label "Second"})
-    "Radio off")
-   (demo/oneliner
     (mdl/icon-toggle
      {:mdl [:ripple]
       :for "icon-toggle-1"
@@ -61,4 +47,44 @@
      {:mdl [:ripple]
       :for "switch-2"
       :input {:id "switch-2"}})
-    "Icon off")))
+    "Icon off")
+   (demo/oneliner
+    (mdl/radio
+     {:mdl [:ripple]
+      :for "option-1"
+      :input {:id "option-1" :name "options" :value "1"}
+      :label "First"})
+    "Radio on"
+    (mdl/radio
+     {:mdl [:ripple]
+      :for "option-2"
+      :input {:id "option-2" :name "options" :value "2"}
+      :label "Second"
+      :checked true})
+    "Radio off")
+   ;; #?(:cljs (.. (js/document.getElementById "option-2") -parentNode -MaterialRadio (check)))
+   #_(demo/snippet-group
+    {:demos
+     [(mdl/radio-group
+       [{:mdl [:ripple]
+         :for "option-a"
+         :input {:id "option-a" :name "option-group-1" :value "1"}
+         :label "A"
+         :checked true}
+        {:mdl [:ripple]
+         :for "option-b"
+         :input {:id "option-b" :name "option-group-1" :value "2"}
+         :label "B"}])]
+     :captions
+     ["Radio groups"]})))
+
+(comment
+  (rum/defc radio-group <
+    {:did-mount
+     (fn [{args :rum/args :as state}]
+       state)}
+    [radios]
+    [:div
+     (for [r radios :let [for (:for r)]]
+       (rum/with-ref (radio r) for))])
+  )

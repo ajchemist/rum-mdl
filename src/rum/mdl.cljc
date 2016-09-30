@@ -551,17 +551,17 @@
                this :rum/react-component
                node :mdl/node type :mdl/type} state
               m (oget node type)]
-          (let [selector (str "." (oget m "CssClasses_" "RIPPLE_CONTAINER"))
-                ripple   (.querySelector node selector)] ; could be ".mdl-js-ripple-effect"
-            (when ripple
-              (upgrade-element ripple)
-              (listen-component-downgraded node #(downgrade-elements ripple))))
-          (when disabled (. m (disable))) ; (. m (enable))
           (when checked
             (case type
               "MaterialSwitch" (. m (on)) ; (. m (off))
               (. m (check))               ; (. m (uncheck))
-              )))
+              ))
+          (when disabled (. m (disable))) ; (. m (enable))
+          (let [selector (str "." (oget m "CssClasses_" "RIPPLE_CONTAINER"))
+                ripple   (.querySelector node selector)] ; could be ".mdl-js-ripple-effect"
+            (when ripple
+              (upgrade-element ripple)
+              (listen-component-downgraded node #(downgrade-elements ripple)))))
         state)}
      ))
 

@@ -52,7 +52,7 @@ and add a =<link>= tag in your =index.html=.
 ** References
 
 - https://github.com/google/material-design-lite
-- https://github.com/google/material-design-lite/blob/master/src/mdlComponentHandler.js
+- https://github.com/google/material-design-lite/blob/mdl-1.x/src/mdlComponentHandler.js
 - https://design.google.com/icons/
 
 ** TODO Todo List
