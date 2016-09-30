@@ -1,22 +1,27 @@
+(def +version+ "0.2.0-SNAPSHOT")
+
 (defmacro ^:private r [sym] `(resolve '~sym))
 
 (set-env!
  :source-paths #{"src" "examples"}
  :dependencies
- '[[ajchemist/classname "0.2.3"]
-   [cljsjs/material "1.1.3-1"]
+ '[[cljsjs/material "1.2.1-0"]
+   [ajchemist/classname "0.2.3"]])
 
-   [org.clojure/clojure "1.8.0" :scope "provided"]
-   [org.clojure/clojurescript "1.9.93" :scope "provided"]
-   [rum "0.10.5" :scope "provided"]
+(merge-env!
+ :dependencies
+ '[[org.clojure/clojure "1.8.0" :scope "provided"]
+   [org.clojure/clojurescript "1.9.229" :scope "provided"]
+   [rum "0.10.6" :scope "provided"]
    [garden "1.3.2" :scope "test"]
-   [binaryage/devtools "0.7.2" :scope "test"]
-   [ajchemist/boot-figwheel "0.5.4-5" :scope "test"]
+   [binaryage/devtools "0.8.2" :scope "test"]
+   [ajchemist/boot-figwheel "0.5.4-6" :scope "test"]
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [com.cemerick/piggieback "0.2.1"  :scope "test"]
-   [figwheel-sidecar "0.5.4-7" :scope "test"]
+   [figwheel-sidecar "0.5.7" :scope "test"]
 
    [adzerk/bootlaces "0.1.13" :scope "test"]
+   [adzerk/boot-test "1.1.2" :scope "test"]
    [adzerk/boot-reload "0.4.11" :scope "test"]
    [pandeiro/boot-http "0.7.3" :scope "test"]])
 
