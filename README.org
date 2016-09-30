@@ -16,8 +16,8 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 
 #+NAME: dependencies
 #+begin_src clojure
-  [rum "0.10.5"]
-  [rum-mdl "0.1.3-1"]
+  [rum "0.10.6"]
+  [rum-mdl "0.2.0"]
 #+end_src
 
 #+NAME: require
@@ -61,15 +61,37 @@ and add a =<link>= tag in your =index.html=.
 
   Here is the list of components which are not fully wrapped yet.
 
-  - cards
   - tabs
   - footer
 
 - Documentation
-  - introduction
-  - rich code section in the [[https://ajchemist.github.io/rum-mdl][example]] pages
+  - much more introduction
 
 ** Changes
+
+*** 0.2.0
+
+- Bumped cljsjs/material to 1.2.1-0
+- Added chips components
+
+  - =mdl/chip=
+  - =mdl/chip-text=
+  - =mdl/chip-contact=
+  - =mdl/chip-action=
+- Added =:key-fn= mixins to toggles
+
+  - checkbox
+  - radio
+  - icon-toggle
+  - switch
+
+- [ BREAK ] Revised the =header= component
+  - =mdl/header= doesn't wrap its contents into =.mdl-layout__header-row= anymore.
+  - Added explicit header-row component, =mdl/header-row=.
+
+**** Known Issue
+
+- https://github.com/google/material-design-lite/pull/4809
 
 *** 0.1.3
 
