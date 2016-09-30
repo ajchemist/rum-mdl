@@ -58,6 +58,9 @@
 
    :card   {:border :mdl-card--border}
 
+   :chip   {:deletable :mdl-chip--deletable
+            :contact   :mdl-chip--contact}
+
    :list {:two              :mdl-list__item--two-line
           :three            :mdl-list__item--three-line
           :primary          :mdl-list__item-primary-content
@@ -285,6 +288,31 @@
 (defmdlc label-button :button component-handler
   [attrs [content]]
   [:label.mdl-button.mdl-js-button ^:attrs attrs content])
+
+;;; chips
+
+(defmdlc chip :chip
+  [attrs ^:contents contents]
+  [:.mdl-chip ^:attrs attrs contents])
+
+(defmdlc button-chip :chip
+  [attrs [content]]
+  [:button.mdl-chip ^:attrs attrs content])
+
+(defn chip-text
+  ([          content] [:.mdl-chip__text nil content])
+  ([    attrs content] [:.mdl-chip__text ^:attrs attrs content])
+  ([tag attrs content] [tag ^:attrs (update attrs :class classname :mdl-chip__text) content]))
+
+(defn chip-contact
+  ([          content] [:.mdl-chip__contact nil content])
+  ([    attrs content] [:.mdl-chip__contact ^:attrs attrs content])
+  ([tag attrs content] [tag ^:attrs (update attrs :class classname :mdl-chip__contact) content]))
+
+(defn chip-action
+  ([          content] [:a.mdl-chip__action nil content])
+  ([    attrs content] [:a.mdl-chip__action ^:attrs attrs content])
+  ([tag attrs content] [tag ^:attrs (update attrs :class classname :mdl-chip__action) content]))
 
 ;;; cards
 
