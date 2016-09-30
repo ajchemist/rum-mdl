@@ -363,8 +363,11 @@
 
 (defmdlc header :header
   [attrs ^:contents contents]
-  [:header.mdl-layout__header ^:attrs attrs
-   [:.mdl-layout__header-row contents]])
+  [:header.mdl-layout__header ^:attrs attrs contents])
+
+(defmdlc header-row :header-row
+  [attrs ^:contents contents]
+  [:.mdl-layout__header-row ^:attrs attrs contents])
 
 (defmdlc nav :nav
   [attrs ^:contents contents]
