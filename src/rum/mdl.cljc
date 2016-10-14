@@ -1,13 +1,10 @@
 (ns rum.mdl
   (:refer-clojure :exclude [list])
-  #?(:cljs
-     (:require-macros [rum.mdl :refer [defmdlc]]))
   (:require
    [rum.core :as rum]
+   [rum.mdl-macros :refer [defmdlc]]
    [classname.core :refer [classname]]
-   #?(:clj
-      [sablono.compiler :as s]
-      :cljs
+   #?(:cljs
       [cljsjs.material])))
 
 (def oget aget)
@@ -201,33 +198,6 @@
          :rum/args [attrs contents]
          :mdl/type (mdl-component typekey)
          ::orig-args args)))})
-
-(defn- defmdlc-binding [binding]
-  (-> binding
-    (update 0 #(or % '_))
-    (update 1 #(or % '_))))
-
-#?(:clj
-   (defmacro defmdlc
-     "binding must be a vector literal"
-     {:arglists '([name mdl-type? docstring? mixin* binding & body])}
-     [& xs]
-     (let [arglists  '([attrs? contents*])
-           [name]    xs
-           xs        (rest xs)
-           ys        (take-while (complement vector?) xs)
-           typekey   (first (filter keyword? ys))
-           docstring (first (filter string? ys))
-           docstring (if docstring docstring "")
-           mixin     (remove #(or (keyword? %) (string? %)) ys)
-           xs        (drop-while (complement vector?) xs)
-           binding   (defmdlc-binding (first xs))
-           contents? (->> binding (map meta) (map :contents) (some boolean))
-           body      (rest xs)]
-       `(rum/defc ~(vary-meta name update :arglists #(or % `(quote ~arglists)))
-          ~'< (mdl-type ~typekey ~contents?) ~@mixin
-          ~binding
-          ~@body))))
 
 #?(:cljs
    (defn upgrade-element [el]
