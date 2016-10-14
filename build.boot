@@ -12,7 +12,7 @@
  :dependencies
  '[[org.clojure/clojure "1.8.0" :scope "provided"]
    [org.clojure/clojurescript "1.9.229" :scope "provided"]
-   [rum "0.10.6" :scope "provided"]
+   [rum "0.10.7" :scope "provided"]
    [garden "1.3.2" :scope "test"]
    [binaryage/devtools "0.8.2" :scope "test"]
    [ajchemist/boot-figwheel "0.5.4-6" :scope "test"]
