@@ -17,7 +17,7 @@ Reusable [[mdl][material-design-lite]] [[react]] components written with [[rum]]
 #+NAME: dependencies
 #+begin_src clojure
   [rum "0.10.7"]
-  [rum-mdl "0.2.0"]
+  [rum-mdl "0.2.1"]
 #+end_src
 
 #+NAME: require
@@ -68,6 +68,10 @@ and add a =<link>= tag in your =index.html=.
   - much more introduction
 
 ** Changes
+
+*** 0.2.1
+
+- Bumped cljsjs/material to 1.3.0-0
 
 *** 0.2.0
 
