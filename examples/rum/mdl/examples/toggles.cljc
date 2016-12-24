@@ -53,14 +53,14 @@
      {:mdl [:ripple]
       :for "option-1"
       :input {:id "option-1" :name "options" :value "1"}
-      :label "First"})
+      :label "First"
+      :checked true})
     "Radio on"
     (mdl/radio
      {:mdl [:ripple]
       :for "option-2"
       :input {:id "option-2" :name "options" :value "2"}
-      :label "Second"
-      :checked true})
+      :label "Second"})
     "Radio off")
    ;; #?(:cljs (.. (js/document.getElementById "option-2") -parentNode -MaterialRadio (check)))
    #_(demo/snippet-group

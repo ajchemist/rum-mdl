@@ -6,16 +6,10 @@
 
 (defn rand-color []
   (str "#"
-       #?(:clj
-          (->> (* (rand) 0xffffff)
-            (Math/floor)
-            (int)
-            (format "%x"))
-          :cljs
-          (-> (rand)
-            (* 0xffffff)
-            (js/Math.floor)
-            (.toString 16)))))
+       (-> (rand)
+         (* 0xffffff)
+         #?(:clj (Math/floor) :cljs (js/Math.floor))
+         #?(:clj (Integer/toHexString) :cljs (.toString 16)))))
 
 (let [color (volatile! "")]
   (defn on-click-fn [this]
